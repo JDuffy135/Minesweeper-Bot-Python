@@ -1,6 +1,7 @@
 import pyautogui
 
 import tileDetection as tD
+import fullAlgorithm
 
 
 # when use enters 'help' command
@@ -9,16 +10,17 @@ def print_command_list() -> None:
     print("   * 'q': terminates program")
     print("   * 'help': prints command list")
     print("   1.) 'ct <col_#> <row_#>': clicks the specified tile and updates gameboard accordingly")
-    print("   2.) 'dt <col_#> <row_#>': detects the tile type of the specified tile without clicking")
+    print("   2.) 'dt <col_#> <row_#>': detects the tile type of the specified tile without updating gameboard")
     print("   3.) 'pb': prints gameboard as it is currently represented in memory")
     print("   4.) 'rs': clicks the restart button and clears gameboard in memory")
+    print("   5.) 'un': returns unfinished numbers list for current gameboard setup")
     return
 
 
 # when user enters 'ct' command
 def click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, col_num, row_num) -> None:
     pyautogui.doubleClick(col_x_coords.get(col_num), row_y_coords.get(row_num))
-    tD.update_tiles(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size)
+    tD.update_tiles_dev_mode(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size)
     return
 
 
@@ -37,7 +39,7 @@ def print_board(gameboard, col_x_coords, row_y_coords) -> None:
 
 
 # when user enters 'rs' command
-def restart(gameboard, col_x_coords, row_y_coords, restart_coords):
+def restart(gameboard, col_x_coords, row_y_coords, restart_coords) -> None:
     for i in range(len(row_y_coords)):
         for j in range(len(col_x_coords)):
             gameboard[i][j] = -1
@@ -64,5 +66,7 @@ def run_developer_mode(gameboard, col_x_coords, row_y_coords, restart_coords, fi
                 print_board(gameboard, col_x_coords, row_y_coords)
             case 'rs':
                 restart(gameboard, col_x_coords, row_y_coords, restart_coords)
+            case 'un':
+                print(fullAlgorithm.update_unfinished_numbers(gameboard, col_x_coords, row_y_coords))
 
     return

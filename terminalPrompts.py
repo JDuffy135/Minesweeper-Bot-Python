@@ -56,6 +56,13 @@ def run_intro_prompts() -> list:
         developer_mode = 'y'
     return_values.append(developer_mode)
 
+    # prompt 7: number of games -> string
+    print("7.) How many games do you want the bot to play? (default is 10)")
+    game_count = input()
+    if len(game_count) < 1:
+        game_count = '10'
+    return_values.append(game_count)
+
     # final message
     print()
     print("Reminders before beginning:")

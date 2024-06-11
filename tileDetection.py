@@ -66,7 +66,7 @@ def return_tile_type(zoom_size: int) -> int:
 
 # performs bfs algorithm to update board surrounding an open tile
 # NOTE: the function titled 'update_tiles_bfs2' is used instead - this is the original, unoptimized code
-# def update_tiles_bfs(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> None:
+# def bfs(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> None:
 #     # for testing
 #     overall_start_time = time.time()
 #
@@ -113,7 +113,7 @@ def return_tile_type(zoom_size: int) -> int:
 
 
 # optimized version of my original BFS algorithm (uses less pyautogui function calls - roughly 25% faster on average)
-def update_tiles_bfs2(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> None:
+def bfs2(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> None:
     # for testing
     overall_start_time = time.time()
 
@@ -172,12 +172,43 @@ def update_tiles_bfs2(gameboard, col_x_coords, row_y_coords, col_num, row_num, z
 
 
 # update gameboard depending on what type of tile the mouse is currently hovering over
-def update_tiles(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> None:
+def update_tiles_dev_mode(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> None:
     val = return_tile_type(zoom_size)
     if val == 0:
         # if current tile is an open space, we use bfs to scan all tiles in the surrounding area
-        update_tiles_bfs2(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size)
+        bfs2(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size)
     elif val != -2:
         # if current tile is not an open space, we scan only one tile
         gameboard[row_num][col_num] = val
+    return
+
+
+# update gameboard depending on what type of tile the mouse is currently hovering over
+# returns 1 if the tile is a mine (game ends), returns 0 otherwise
+def update_tiles(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> int:
+    val = return_tile_type(zoom_size)
+    if val == 0:
+        # if current tile is an open space, we use bfs to scan all tiles in the surrounding area
+        bfs2(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size)
+    elif val != -2:
+        # if current tile is not an open space, we scan only one tile (and we return 1 if a mine is uncovered)
+        if val == 9:
+            return 1
+        gameboard[row_num][col_num] = val
+    return 0
+
+
+# clicks specified tile and updates gameboard respectively, plus returns a 1 if a mine is clicked (0 otherwise)
+def click_tile_and_update_board(gameboard, col_x_coords, row_y_coords, zoom_size, col_num, row_num) -> int:
+    pyautogui.click(col_x_coords.get(col_num), row_y_coords.get(row_num))
+    loss_status = update_tiles(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size)
+    return loss_status
+
+
+# restarts game and clear gameboard
+def restart(gameboard, col_x_coords, row_y_coords, restart_coords) -> None:
+    for i in range(len(row_y_coords)):
+        for j in range(len(col_x_coords)):
+            gameboard[i][j] = -1
+    pyautogui.click(restart_coords[0], restart_coords[1])
     return
