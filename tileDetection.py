@@ -139,7 +139,7 @@ def bfs2(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> 
             continue
 
         # adds 8 adjacent neighbors to queue if they are 1.) within the range of the board size, 2.) not already in
-        # the queue, and 3.) and already visited
+        # the queue, and 3.) not already in visited
         if (cur_tile[0] - 1 >= 0) and ((cur_tile[0] - 1, cur_tile[1]) not in queue and (cur_tile[0] - 1, cur_tile[1]) not in visited):
             queue.append((cur_tile[0] - 1, cur_tile[1]))
         if (cur_tile[0] + 1 < len(col_x_coords)) and ((cur_tile[0] + 1, cur_tile[1]) not in queue and (cur_tile[0] + 1, cur_tile[1]) not in visited):
