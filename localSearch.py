@@ -1,5 +1,8 @@
 import time
+import copy
 
+
+# returns adjacent tiles which are marked as closed for each tile in unfinished_numbers
 def return_border_tiles(gameboard, col_x_coords, row_y_coords, unfinished_numbers) -> list:
     border_tiles = []
     for tile in unfinished_numbers:
@@ -13,6 +16,7 @@ def return_border_tiles(gameboard, col_x_coords, row_y_coords, unfinished_number
     return border_tiles
 
 
+# returns list of number tiles adjacent to the given tile
 def return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords, tile) -> list:
     bordering_number_tiles = []
     for c in range(tile[0] - 1, tile[0] + 2):
@@ -23,7 +27,8 @@ def return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords, tile) -
     return bordering_number_tiles
 
 
-def aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles) -> list:
+# separates border tiles into multiple aggregations of possible in order to reduce runtime of local search algorithm
+def aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles) -> list[list[tuple]]:
     aggregations = []
 
     # create copy of border_tiles because we don't want to modify the border_tiles list itself
@@ -97,11 +102,144 @@ def aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles) 
         # add visited list to aggregations as a new list within the aggregations list
         aggregations.append(visited)
 
+    # for testing
     print("aggregations found: ", end="")
     print(len(aggregations))
     print("aggregations: ", end="")
     print(aggregations)
+
     return aggregations
+
+
+# used in is_valid_board_placement to figure out if a particular number tile is oversatisfied (returns True if so)
+def is_oversatisfied(gameboard, col_x_coords, row_y_coords, tile) -> bool:
+    mines_found = 0
+    tile_number = gameboard[tile[1]][tile[0]]
+    for c in range(tile[0] - 1, tile[0] + 2):
+        for r in range(tile[1] - 1, tile[1] + 2):
+            if (c >= 0 and c < len(col_x_coords)) and (r >= 0 and r < len(row_y_coords)):
+                if gameboard[r][c] == 9:
+                    mines_found = mines_found + 1
+    return (mines_found > tile_number)
+
+
+# used in find_all_bomb_combinations backtracking algorithm to check if a particular mine combination is valid
+# note: a combination is valid if none of the surrounding number tiles are oversatisfied (ex: 3 bombs around a 2 tile)
+def is_valid_mine_placement(gameboard, aggregation, col_x_coords, row_y_coords, combination) -> bool:
+    if len(combination) == 0:
+        return True
+
+    # create a deep copy of the gameboard and get dimensions of board
+    tmp_gameboard = copy.deepcopy(gameboard)
+    row_count = len(row_y_coords)
+    col_count = len(col_x_coords)
+
+    # place mines from combination list onto copy of gameboard
+    for mine in combination:
+        tmp_gameboard[mine[1]][mine[0]] = 9
+
+    # NOTE: FOR TESTING
+    # print ("tmp board: ", end="")
+    # print()
+    # for i in range(row_count):
+    #     print(tmp_gameboard[i])
+
+    # return list of number tiles surrounding the aggregation
+    bordering_number_tiles = set()
+    for tile in aggregation:
+        bordering_number_tiles.update(return_bordering_number_tiles(tmp_gameboard, col_x_coords, row_y_coords, tile))
+
+    # if any of the number tiles are oversatisfied, return False
+    for number_tile in bordering_number_tiles:
+        if is_oversatisfied(tmp_gameboard, col_x_coords, row_y_coords, number_tile) == True:
+            return False
+
+    return True
+
+
+# used in is_valid_combination to figure out if a particular number tile is satisfied (returns True if so)
+def is_satisfied(gameboard, col_x_coords, row_y_coords, tile) -> bool:
+    mines_found = 0
+    tile_number = gameboard[tile[1]][tile[0]]
+    for c in range(tile[0] - 1, tile[0] + 2):
+        for r in range(tile[1] - 1, tile[1] + 2):
+            if (c >= 0 and c < len(col_x_coords)) and (r >= 0 and r < len(row_y_coords)):
+                if gameboard[r][c] == 9:
+                    mines_found = mines_found + 1
+    return (mines_found == tile_number)
+
+
+# used in base case of find_all_bomb_combinations backtracking algorithm to figure out if the combination is valid
+# returns True if all surrounding number tiles are satisfied
+def is_valid_combination(gameboard, aggregation, col_x_coords, row_y_coords, combination) -> bool:
+    if len(combination) == 0:
+        return False
+
+    # create a deep copy of the gameboard and get dimensions of board
+    tmp_gameboard = copy.deepcopy(gameboard)
+    row_count = len(row_y_coords)
+    col_count = len(col_x_coords)
+
+    # place mines from combination list onto copy of gameboard
+    for mine in combination:
+        tmp_gameboard[mine[1]][mine[0]] = 9
+
+    # return list of number tiles surrounding the aggregation
+    bordering_number_tiles = set()
+    for tile in aggregation:
+        bordering_number_tiles.update(return_bordering_number_tiles(tmp_gameboard, col_x_coords, row_y_coords, tile))
+
+    # if any of the number tiles arent satisfied, return False
+    for number_tile in bordering_number_tiles:
+        if is_satisfied(tmp_gameboard, col_x_coords, row_y_coords, number_tile) == False:
+            return False
+
+    # NOTE: FOR TESTING
+    # print("tmp board: ", end="")
+    # print()
+    # for i in range(row_count):
+    #     print(tmp_gameboard[i])
+
+    return True
+
+
+# returns a list of lists of lists defined as follows...
+# mine_combinations[i] = i-th aggregation's list of possbile mine combinations (list of lists)
+# mine_combinations[i][j] = i-th aggregation's j-th mine combination (list of tuples, each representing a mine tile)
+# mine_combinations[i][j][k] = the k-th mine tile in the i-th aggregation's j-th mine combination (tuple)
+def find_all_mine_combinations(gameboard, col_x_coords, row_y_coords, aggregations, bombs_remaining) -> list[list[list[tuple]]]:
+    # final returned list, which contains a list of mine combination lists for each aggregation
+    mine_combinations = [[] for aggregation in aggregations]
+
+    start = time.time()
+
+    # backtracking algorithm which returns a list of lists (each inner list is a list of bomb tiles which are tuples)
+    def backtrack(gameboard, col_x_coords, row_y_coords, aggregation_index, aggregation, start_index, combination, max_mines) -> None:
+        # base case
+        if ((start_index == len(aggregation)) or len(combination) == max_mines):
+            # print("BASE CASE")
+            # print(combination)
+            if is_valid_combination(gameboard, aggregation, col_x_coords, row_y_coords, combination):
+                mine_combinations[aggregation_index].append(combination.copy())
+                # print("appended")
+            return
+
+        # if the board placement is valid, try backtracking algorithm first without adding the next mine, and then
+        # try again with adding the next mine
+        if is_valid_mine_placement(gameboard, aggregation, col_x_coords, row_y_coords, combination) == True:
+            backtrack(gameboard, col_x_coords, row_y_coords, aggregation_index, aggregation, start_index + 1, combination, max_mines)
+            combination.append(aggregation[start_index])
+            backtrack(gameboard, col_x_coords, row_y_coords, aggregation_index, aggregation, start_index + 1, combination, max_mines)
+            combination.pop()
+        else:
+            return
+
+    # for each aggregation, we find all possible vald combinations of mine placements
+    for i in range(len(mine_combinations)):
+        backtrack(gameboard, col_x_coords, row_y_coords, i, aggregations[i], 0, [], bombs_remaining)
+
+    print(time.time() - start)
+    return mine_combinations
 
 
 # runs local search algorithm and returns a list with 2 indices...
@@ -118,16 +256,11 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
     # STEP 1: make list of border tiles
     border_tiles = return_border_tiles(gameboard, col_x_coords, row_y_coords, unfinished_numbers)
 
-    # STEP 2: aggregate border tiles into groups of connected tiles (use a modified bfs algorithm)
+    # STEP 2: aggregate border tiles into distinct groups with shared number tiles
     aggregations = aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles)
 
-    # STEP 3: for each aggregation, find all possible combinations of possible bomb placements
-    # note: bomb combinations is a list of lists containing lists defined as follows...
-    # bomb_combinations[i] = i-th aggregation's list of possbile bomb combinations
-    # bomb_combinations[i][j] = i-th aggregation's j-th bomb combination (list of tuples, each representing a bomb tile)
-    # bomb_combinations[i][j][k] = the k-th bomb tile in the i-th aggregation's j-th bomb combination
-    bomb_combinations = []
-    # ...
+    # STEP 3: for each aggregation, find all possible combinations of bomb placements
+    mine_combinations = find_all_mine_combinations(gameboard, col_x_coords, row_y_coords, aggregations, bombs_remaining)
 
     # STEP 4: for each aggregation's possible bomb combinations, check for the following...
     # a.) if a tile is in every combination, mark it as a bomb on gameboard and append tile to mine_tiles
@@ -138,10 +271,10 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 
 
 # TESTING
-gameboard = [[-1, 2, -1, -1, 2], [-1, -1, -1, -1, 2], [-1, -1, -1, -1,-1], [-1, -1, -1, -1, 2], [-1, -1, -1, -1, -1]]
+gameboard = [[2, 2, 1, -1, -1], [-1, -1, 2, -1, -1], [-1, -1, -1, -1,-1], [-1, -1, -1, -1, -1], [-1, -1, -1, -1, -1]]
 col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420}
 row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280}
-unfinished_numbers = [(1,0), (4,0), (4,1), (4,3)]
+unfinished_numbers = [(0,0), (1, 0), (2, 0), (2, 1)]
 
 for i in range(len(row_y_coords)):
     print(gameboard[i])
@@ -152,7 +285,13 @@ print("number of border tiles found: ", end="")
 print(len(borders))
 print("border tiles: ", end="")
 print(borders)
-aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, borders)
+aggregations = aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, borders)
+print()
+print("bomb combinations for each aggregation respectively...")
+all_combinations = find_all_mine_combinations(gameboard, col_x_coords, row_y_coords, aggregations, 99)
+print(all_combinations)
+for i in range(len(all_combinations)):
+    print(len(all_combinations[i]))
 print()
 
 for i in range(len(row_y_coords)):

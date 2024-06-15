@@ -49,10 +49,10 @@ def trivial_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers) ->
 
 
 # TESTING
-# gameboard = [[-1, -1, -1, 3, -1], [-1, 8, -1, -1, -1], [-1, -1, -1, -1, -1], [2, -1, -1, 8, -1], [-1, -1, -1, -1, -1]]
+# gameboard = [[1, 2, 2, 1, -1], [2, 9, 9, -1, -1], [3, 9, -1, -1,-1], [9, -1, -1, -1, -1], [1, -1, -1, -1, -1]]
 # col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420}
 # row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280}
-# unfinished_numbers = [(0,3), (1,1), (3, 0), (3, 3)]
+# unfinished_numbers = [(0, 0), (1, 0), (2, 0), (3, 0), (0, 1), (0, 2), (0, 4)]
 #
 # for i in range(len(row_y_coords)):
 #     print(gameboard[i])
