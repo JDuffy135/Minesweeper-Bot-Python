@@ -53,7 +53,7 @@ def aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles) 
             # in the queue, 3.) aren't already in visited, 4.) are present in remaining_border_tiles, and 5.) have at
             # least one number tile in it's range that is also in range of the current tile (i.e. the current border
             # tile and the neighboring border tile both have at least one bordering number tile in common)
-            # NOTE: absolutely disgusting chunk of code right here but it fucking works so stfu
+            # NOTE: absolutely disgusting chunk of code right here but it works so stfu
             if (cur_tile[0] - 1 >= 0) and ((cur_tile[0] - 1, cur_tile[1]) not in queue and (cur_tile[0] - 1, cur_tile[1]) not in visited):
                 if ((cur_tile[0] - 1, cur_tile[1]) in remaining_border_tiles):
                     neighbor_num_tiles = return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords, (cur_tile[0] - 1, cur_tile[1]))
@@ -101,12 +101,6 @@ def aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles) 
                         queue.append((cur_tile[0] + 1, cur_tile[1] + 1))
         # add visited list to aggregations as a new list within the aggregations list
         aggregations.append(visited)
-
-    # for testing
-    # print("aggregations found: ", end="")
-    # print(len(aggregations))
-    # print("aggregations: ", end="")
-    # print(aggregations)
 
     return aggregations
 
@@ -250,13 +244,18 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 
     # STEP 2: aggregate border tiles into distinct groups with shared number tiles
     aggregations = aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles)
-    for agg in aggregations:
-        if len(agg) > 21:
-            print("local search not practical in this case - too many possible combinations to try")
-            return [0, []]
+    for i in range(len(aggregations)):
+        if len(aggregations[i]) > 21:
+            print("local search not practical for this aggregation")
+            aggregations[i] = []
 
     # STEP 3: for each aggregation, find all possible combinations of bomb placements
     mine_combinations = find_all_mine_combinations(gameboard, col_x_coords, row_y_coords, aggregations, bombs_remaining)
+
+    # FOR TESTING
+    # print("mine combinations for each aggregate...")
+    # for agg in mine_combinations:
+    #     print(agg)
 
     # STEP 4a: for each tile in each aggregation, check if it is...
     # a.) in every bomb combination for it's respective aggregation (if so, mark it as a mine and append to mine_tiles)
@@ -267,7 +266,7 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
                 if border_tile not in combination:
                     flag = 1
                     break
-            if flag == 0:
+            if flag == 0 and len(mine_combinations[a]) > 0:
                 gameboard[border_tile[1]][border_tile[0]] = 9
                 mine_tiles.append(border_tile)
 
@@ -287,6 +286,7 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
     return [len(mine_tiles), click_tiles]
 
 
+
 # TESTING
 gameboard = [
     [-1, -1, -1, -1, -1, -1, -1, -1, -1],
@@ -299,8 +299,6 @@ gameboard = [
     [-1, -1, -1, 9, 2, 2, 2, 2, -1],
     [-1, -1, -1, -1, -1, -1, -1, -1, -1],
 ]
-col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450, 6: 480, 7: 510, 8: 540}
-row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280, 5: 310, 6: 340, 7: 370, 8: 400}
 unfinished_numbers = [
     (1,3),
     (1,4),
@@ -323,6 +321,31 @@ unfinished_numbers = [
     (7,6),
     (7,7)
 ]
+col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450, 6: 480, 7: 510, 8: 540}
+row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280, 5: 310, 6: 340, 7: 370, 8: 400}
+
+# gameboard = [
+#     [2, 2, 1, 0, 0, 0, 1, 1, 1],
+#     [9, 9, 1, 0, 0, 0, 1, 9, 1],
+#     [2, 3, 2, 1, 1, 1, 2, 1, 1],
+#     [0, 2, 9, 3, 2, 9, 1, 0, 0],
+#     [0, 3, 9, -1, -1, 2, 1, 0, 0],
+#     [1, 3, 9, -1, -1, 2, 1, 0, 0],
+#     [9, 2, 2, -1, 2, 9, 1, 0, 0],
+#     [1, 1, 1, -1, 2, 1, 1, 0, 0],
+# ]
+# unfinished_numbers = [
+#     (3,3),
+#     (4,3),
+#     (5,4),
+#     (5,5),
+#     (4,6),
+#     (4,7),
+#     (2,6),
+#     (2,7)
+# ]
+# col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450, 6: 480, 7: 510, 8: 540}
+# row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280, 5: 310, 6: 340, 7: 370}
 
 for i in range(len(row_y_coords)):
     print(gameboard[i])
