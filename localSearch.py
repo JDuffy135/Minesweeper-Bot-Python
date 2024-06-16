@@ -284,9 +284,7 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
                 print("local search not practical for this aggregation")
                 aggregations[i] = []
     else:
-        # NOTE: aggregation_count is only useful if it is equal to 1, as in this case, we only care about mine
-        # combinations whose length is exactly equal to bombs_remaining
-        aggregation_count = len(aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles, endgame))
+        # aggregation_count = len(aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles, endgame))
         aggregations = []
         aggregations.append(border_tiles)
         if len(aggregations[0]) > 21:
@@ -308,7 +306,7 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 
     # END-GAME OPTIMIZATION #2: remove all mine combinations whose length is larger than bombs_remaining
     # (as, for instance, it's not possible to have a combination with 3 mines if there are only 2 remaining mines)
-    if endgame == True and aggregation_count != 1:
+    if endgame == True:
         for agg in mine_combinations:
             index = 0
             while index < len(agg):
@@ -318,16 +316,16 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
                     agg.remove(agg[index])
                 else:
                     index = index + 1
-    elif endgame == True and aggregation_count == 1:
-        for agg in mine_combinations:
-            index = 0
-            while index < len(agg):
-                if len(agg[index]) != bombs_remaining:
-                    # print("REMOVED AGGREGATION OF SIZE ", end="")  # for testing
-                    # print(len(agg[index]))  # for testing
-                    agg.remove(agg[index])
-                else:
-                    index = index + 1
+    # elif endgame == True and aggregation_count == 1:
+    #     for agg in mine_combinations:
+    #         index = 0
+    #         while index < len(agg):
+    #             if len(agg[index]) != bombs_remaining:
+    #                 # print("REMOVED AGGREGATION OF SIZE ", end="")  # for testing
+    #                 # print(len(agg[index]))  # for testing
+    #                 agg.remove(agg[index])
+    #             else:
+    #                 index = index + 1
     if endgame == True and len(mine_combinations[0]) == 0:
         print("not a valid game board")
         return [0, []]
@@ -462,17 +460,34 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 # GAME BOARD #4 (end-game scenario)
 # expected output with bombs_remaining set to 2: [0, [(3, 2)]]
 # note: if bombs_remaining != 2, this is not a valid gameboard
+# gameboard = [
+#     [1, 2, 3, 9, 9, 9],
+#     [9, 4, 9, 9, -1, 4],
+#     [9, -1, -1, -1, -1, 9]
+# ]
+# unfinished_numbers = [
+#     (1,1),
+#     (5,1)
+# ]
+# col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450}
+# row_y_coords = {0: 160, 1: 190, 2: 220}
+
+
+# GAME BOARD #5 (end-game scenario)
+# expected output with bombs_remaining set to ...
 gameboard = [
-    [1, 2, 3, 9, 9, 9],
-    [9, 4, 9, 9, -1, 4],
-    [9, -1, -1, -1, -1, 9]
+    [1, -1, 1, 0, 0, 0],
+    [-1, -1, 1, 0, 0, 0],
+    [-1, -1, 1, 1, 0, 0],
+    [-1, -1, -1, 1, 0, 0],
+    [-1, -1, -1, 1, 0, 0],
 ]
 unfinished_numbers = [
     (1,1),
     (5,1)
 ]
 col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450}
-row_y_coords = {0: 160, 1: 190, 2: 220}
+row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280}
 
 
 for i in range(len(row_y_coords)):
@@ -480,7 +495,7 @@ for i in range(len(row_y_coords)):
 print()
 
 
-print(local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, 2))
+print(local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, 3))
 print("^^ LOCAL SEARCH FUNCTION RESULTS: [mines marked, click tiles]")
 print()
 
