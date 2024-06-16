@@ -37,7 +37,7 @@ def return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords, tile) -
 
 
 # separates border tiles into multiple aggregations of possible in order to reduce runtime of local search algorithm
-def aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles, endgame:bool) -> list[list[tuple]]:
+def aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles) -> list[list[tuple]]:
     aggregations = []
 
     # create copy of border_tiles because we don't want to modify the border_tiles list itself
@@ -66,47 +66,47 @@ def aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles, 
             if (cur_tile[0] - 1 >= 0) and ((cur_tile[0] - 1, cur_tile[1]) not in queue and (cur_tile[0] - 1, cur_tile[1]) not in visited):
                 if ((cur_tile[0] - 1, cur_tile[1]) in remaining_border_tiles):
                     neighbor_num_tiles = return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords, (cur_tile[0] - 1, cur_tile[1]))
-                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)) or endgame == True:
+                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)):
                         queue.append((cur_tile[0] - 1, cur_tile[1]))
             if (cur_tile[0] + 1 < len(col_x_coords)) and ((cur_tile[0] + 1, cur_tile[1]) not in queue and (cur_tile[0] + 1, cur_tile[1]) not in visited):
                 # note: col_x_coords.len() gives us the number of columns
                 if ((cur_tile[0] + 1, cur_tile[1]) in remaining_border_tiles):
                     neighbor_num_tiles = return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords, (cur_tile[0] + 1, cur_tile[1]))
-                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)) or endgame == True:
+                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)):
                         queue.append((cur_tile[0] + 1, cur_tile[1]))
             if (cur_tile[1] - 1 >= 0) and ((cur_tile[0], cur_tile[1] - 1) not in queue and (cur_tile[0], cur_tile[1] - 1) not in visited):
                 if ((cur_tile[0], cur_tile[1] - 1) in remaining_border_tiles):
                     neighbor_num_tiles = return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords,(cur_tile[0], cur_tile[1] - 1))
-                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)) or endgame == True:
+                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)):
                         queue.append((cur_tile[0], cur_tile[1] - 1))
             if (cur_tile[1] + 1 < len(row_y_coords)) and ((cur_tile[0], cur_tile[1] + 1) not in queue and (cur_tile[0], cur_tile[1] + 1) not in visited):
                 # note: row_y_coords.len() gives us the number of rows
                 if ((cur_tile[0], cur_tile[1] + 1) in remaining_border_tiles):
                     neighbor_num_tiles = return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords,(cur_tile[0], cur_tile[1] + 1))
-                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)) or endgame == True:
+                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)):
                         queue.append((cur_tile[0], cur_tile[1] + 1))
 
             if (cur_tile[0] - 1 >= 0 and cur_tile[1] - 1 >= 0) and ((cur_tile[0] - 1, cur_tile[1] - 1) not in queue and (cur_tile[0] - 1, cur_tile[1] - 1) not in visited):
                 if ((cur_tile[0] - 1, cur_tile[1] - 1) in remaining_border_tiles):
                     neighbor_num_tiles = return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords,(cur_tile[0] - 1, cur_tile[1] - 1))
-                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)) or endgame == True:
+                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)):
                         queue.append((cur_tile[0] - 1, cur_tile[1] - 1))
             if (cur_tile[0] + 1 < len(col_x_coords) and cur_tile[1] - 1 >= 0) and ((cur_tile[0] + 1, cur_tile[1] - 1) not in queue and (cur_tile[0] + 1, cur_tile[1] - 1) not in visited):
                 # note: col_x_coords.len() gives us the number of columns
                 if ((cur_tile[0] + 1, cur_tile[1] - 1) in remaining_border_tiles):
                     neighbor_num_tiles = return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords,(cur_tile[0] + 1, cur_tile[1] - 1))
-                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)) or endgame == True:
+                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)):
                         queue.append((cur_tile[0] + 1, cur_tile[1] - 1))
             if (cur_tile[0] - 1 >= 0 and cur_tile[1] + 1 < len(row_y_coords)) and ((cur_tile[0] - 1, cur_tile[1] + 1) not in queue and (cur_tile[0] - 1, cur_tile[1] + 1) not in visited):
                 if ((cur_tile[0] - 1, cur_tile[1] + 1) in remaining_border_tiles):
                     neighbor_num_tiles = return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords,(cur_tile[0] - 1, cur_tile[1] + 1))
-                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)) or endgame == True:
+                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)):
                         queue.append((cur_tile[0] - 1, cur_tile[1] + 1))
             if (cur_tile[0] + 1 < len(col_x_coords) and cur_tile[1] + 1 < len(row_y_coords)) and ((cur_tile[0] + 1, cur_tile[1] + 1) not in queue and (cur_tile[0] + 1, cur_tile[1] + 1) not in visited):
                 # note: row_y_coords.len() gives us the number of rows
                 if ((cur_tile[0] + 1, cur_tile[1] + 1) in remaining_border_tiles):
                     neighbor_num_tiles = return_bordering_number_tiles(gameboard, col_x_coords, row_y_coords,(cur_tile[0] + 1, cur_tile[1] + 1))
-                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)) or endgame == True:
+                    if len(set(neighbor_num_tiles + bordering_number_tiles)) < (len(neighbor_num_tiles) + len(bordering_number_tiles)):
                         queue.append((cur_tile[0] + 1, cur_tile[1] + 1))
         # add visited list to aggregations as a new list within the aggregations list
         aggregations.append(visited)
@@ -243,9 +243,9 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
     start = time.time()
     mine_tiles = []
     click_tiles = []
-    endgame_threshold = 4  # when bombs_remaining is less than this value, we use end-game optimizations
+    endgame_threshold = 6  # when bombs_remaining is less than this value, we use end-game optimizations
 
-    # STEP 0: for end-game optimizations
+    # STEP 0: initializing bool value for end-game optimizations
     endgame = False
     if bombs_remaining < endgame_threshold:
         endgame = True
@@ -258,12 +258,16 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
         border_tiles = return_border_tiles_endgame(gameboard, col_x_coords, row_y_coords)
 
 
-    # STEP 2: aggregate border tiles into distinct groups with shared number tiles
-    aggregations = aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles, endgame)
-    for i in range(len(aggregations)):
-        if len(aggregations[i]) > 21:
-            print("local search not practical for this aggregation")
-            aggregations[i] = []
+    # STEP 2: aggregate border tiles into distinct groups with shared number tiles (if not endgame)
+    if endgame == False:
+        aggregations = aggregate_border_tiles(gameboard, col_x_coords, row_y_coords, border_tiles)
+        for i in range(len(aggregations)):
+            if len(aggregations[i]) > 21:
+                print("local search not practical for this aggregation")
+                aggregations[i] = []
+    else:
+        aggregations = []
+        aggregations.append(border_tiles)
 
 
     # STEP 3: for each aggregation, find all possible combinations of bomb placements
@@ -280,7 +284,7 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 
     # END-GAME OPTIMIZATION #2: remove all mine combinations whose length is larger than bombs_remaining
     # (as, for instance, it's not possible to have a combination with 3 mines if there are only 2 remaining mines)
-    if bombs_remaining < endgame_threshold:
+    if endgame == True:
         for agg in mine_combinations:
             index = 0
             while index < len(agg):
@@ -314,7 +318,7 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
                 mine_tiles.append(border_tile)
 
 
-    # STEP 4b: for each tile in each aggregation, check if it...
+    # STEP 4b: for each tile in each aggregation, check if it is...
     # b.) in NONE of the bomb combinations for it's respective aggregation (if so, append to click_tiles)
     for a in range(len(aggregations)):
         for border_tile in aggregations[a]:
@@ -332,6 +336,9 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 
 
 # TESTING
+
+# GAMEBOARD #1
+# expected output: [7, [(0, 4), (2, 7), (7, 3), (5, 3), (3, 8)]]
 # gameboard = [
 #     [-1, -1, -1, -1, -1, -1, -1, -1, -1],
 #     [-1, -1, -1, -1, -1, -1, -1, -1, -1],
@@ -368,6 +375,9 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 # col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450, 6: 480, 7: 510, 8: 540}
 # row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280, 5: 310, 6: 340, 7: 370, 8: 400}
 
+
+# GAMEBOARD #2
+# expected output: [1, [(3, 4), (4, 5), (3, 5)]]
 # gameboard = [
 #     [2, 2, 1, 0, 0, 0, 1, 1, 1],
 #     [9, 9, 1, 0, 0, 0, 1, 9, 1],
@@ -391,39 +401,48 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 # col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450, 6: 480, 7: 510, 8: 540}
 # row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280, 5: 310, 6: 340, 7: 370}
 
-# gameboard = [
-#     [9, 3, 1],
-#     [9, -1, -1],
-#     [2, -1, -1]
-# ]
-# unfinished_numbers = [
-#     (0,0),
-#     (1,0),
-#     (2,0),
-#     (0,1),
-#     (0,2)
-# ]
-# col_x_coords = {0: 300, 1: 330, 2: 360}
-# row_y_coords = {0: 160, 1: 190, 2: 220}
 
+# GAMEBOARD #3 (end-game scenario)
+# expected output with bombs_remaining set to 1: [1, [(2, 1), (1, 2), (2, 2)]]
+# expected output with bombs_remaining > 1: [0, []]
 gameboard = [
-    [1, 2, 3, 9, 9, 9],
-    [9, 4, 9, 9, -1, 4],
-    [9, -1, -1, -1, -1, 9],
+    [9, 3, 1],
+    [9, -1, -1],
+    [2, -1, -1]
 ]
 unfinished_numbers = [
-    (1,1),
-    (5,1)
+    (0,0),
+    (1,0),
+    (2,0),
+    (0,1),
+    (0,2)
 ]
-col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450}
+col_x_coords = {0: 300, 1: 330, 2: 360}
 row_y_coords = {0: 160, 1: 190, 2: 220}
+
+
+# GAME BOARD #4 (end-game scenario)
+# expected output with bombs_remaining set to 2: [0, [(3, 2)]]
+# expected output with bombs_remaining > 2: [0, []]
+# note: if bombs_remaining < 2, this is not a valid gameboard
+# gameboard = [
+#     [1, 2, 3, 9, 9, 9],
+#     [9, 4, 9, 9, -1, 4],
+#     [9, -1, -1, -1, -1, 9],
+# ]
+# unfinished_numbers = [
+#     (1,1),
+#     (5,1)
+# ]
+# col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450}
+# row_y_coords = {0: 160, 1: 190, 2: 220}
 
 for i in range(len(row_y_coords)):
     print(gameboard[i])
 print()
 
 
-print(local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, 2))
+print(local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, 1))
 print("^^ LOCAL SEARCH FUNCTION RESULTS: [mines marked, click tiles]")
 print()
 
