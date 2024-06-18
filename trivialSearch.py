@@ -1,7 +1,7 @@
 # runs trivial search algorithm and returns a list with 2 indices...
 # index 0: number of tiles that were marked as mines
 # index 1: list of tiles (tuples of format (cols, rows)) to be clicked
-def trivial_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers) -> list:
+def trivial_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers) -> list[int, list[tuple]]:
     mine_tiles = []
     click_tiles = []
 

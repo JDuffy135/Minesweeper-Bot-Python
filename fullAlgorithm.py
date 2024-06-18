@@ -5,8 +5,7 @@ import tileDetection as tD
 
 
 # returns list of number tiles which have at least 1 unrevealed tile not marked as a mine in it's surrounding area
-def update_unfinished_numbers(gameboard, col_x_coords, row_y_coords) -> list:
-    start = time.time()
+def update_unfinished_numbers(gameboard, col_x_coords, row_y_coords) -> list[tuple]:
     unfinished_numbers = []
     for r in range(len(row_y_coords)):
         for c in range(len(col_x_coords)):
@@ -23,9 +22,7 @@ def update_unfinished_numbers(gameboard, col_x_coords, row_y_coords) -> list:
                             unfinished_numbers.append((c, r))
                             flag = 1
                             break
-    end = time.time()
-    print(end - start)
-    print(len(unfinished_numbers))
+    # print(len(unfinished_numbers))
     return unfinished_numbers
 
 

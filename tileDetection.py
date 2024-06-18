@@ -133,8 +133,8 @@ def bfs2(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> 
         if cur_tile_type <= 0:
             gameboard[cur_tile[1]][cur_tile[0]] = cur_tile_type
         else:
-            end = time.time()
-            print(end - start)
+            # end = time.time()
+            # print(end - start)
             gameboard[cur_tile[1]][cur_tile[0]] = cur_tile_type
             continue
 
@@ -161,13 +161,13 @@ def bfs2(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size) -> 
         if (cur_tile[0] + 1 < len(col_x_coords) and cur_tile[1] + 1 < len(row_y_coords)) and ((cur_tile[0] + 1, cur_tile[1] + 1) not in queue and (cur_tile[0] + 1, cur_tile[1] + 1) not in visited):
             # note: row_y_coords.len() gives us the number of rows
             queue.append((cur_tile[0] + 1, cur_tile[1] + 1))
-        end = time.time()
-        print(end - start)
+        # end = time.time()
+        # print(end - start)
 
-    overall_end_time = time.time()
-    print(overall_end_time - overall_start_time)
-    print("Tiles visited:", end="")
-    print(len(visited))
+    # overall_end_time = time.time()
+    # print(overall_end_time - overall_start_time)
+    # print("Tiles visited:", end="")
+    # print(len(visited))
     return
 
 

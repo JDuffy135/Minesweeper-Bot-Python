@@ -50,7 +50,7 @@ guesses = []  # the amount of guesses per game is added here regardless of outco
 print()
 print()
 if responses[5] == 'y':
-    developerMode.run_developer_mode(gameboard, col_x_coords, row_y_coords, responses[0], responses[1], int(responses[2]))
+    developerMode.run_developer_mode(gameboard, col_x_coords, row_y_coords, responses[0], responses[1], int(responses[2]), bombs_remaining)
     exit()
 
 
