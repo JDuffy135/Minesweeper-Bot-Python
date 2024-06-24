@@ -1,5 +1,6 @@
 import time
 import copy
+import patternRecognition as pR
 
 
 # returns adjacent tiles which are marked as closed for each tile in unfinished_numbers
@@ -314,7 +315,7 @@ def find_all_mine_combinations(gameboard, col_x_coords, row_y_coords, aggregatio
             # NOTE: mine_combinations[i] will be an empty list in this case
             print("   local search not practical for this aggregation (size: ", end="")
             print(len(aggregations[i]), end="")
-            print(")", end="")
+            print(")")
 
     return mine_combinations
 
@@ -432,6 +433,21 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
                     break
             if flag == 0 and len(mine_combinations[a]) > 0:
                 click_tiles.append(border_tile)
+
+
+    # STEP 5: for each aggregation that is too large to be probed with local search (AKA aggregations of size 22+), we
+    # pass them into the pattern recognition function to see if there are any guaranteed moves we can make without
+    # computing all the possible mine combinations
+    for i in range(len(aggregations)):
+        if len(aggregations[i]) >= 22:
+            bordering_unfinished_numbers = set()
+            for border_tile in aggregations[i]:
+                cur_set = return_bordering_unfinished_numbers(gameboard, col_x_coords, row_y_coords, unfinished_numbers, border_tile)
+                bordering_unfinished_numbers.update(cur_set)
+            result = pR.pattern_recognition(gameboard, col_x_coords, row_y_coords, list(bordering_unfinished_numbers), bombs_remaining - len(mine_tiles))
+            mine_tiles.extend(result[0])
+            click_tiles.extend(result[1])
+
 
     # print(time.time() - start)
     return [len(mine_tiles), click_tiles, aggregations, mine_combinations]

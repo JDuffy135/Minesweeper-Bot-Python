@@ -143,6 +143,8 @@ def run_developer_mode(gameboard, col_x_coords, row_y_coords, restart_coords, fi
     while user_input != 'q':
         print("enter a command (enter 'help' for command list): ", end="")
         user_input = input()
+        if len(user_input) == 0:
+            continue
         inputs = user_input.split()  # splits user_input by spaces to differentiate between command and parameters
         match inputs[0]:
             case 'help':

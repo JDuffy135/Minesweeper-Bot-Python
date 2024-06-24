@@ -48,11 +48,15 @@ def probabilityEngine(gameboard, col_x_coords, row_y_coords, aggregations, mine_
                 # print(" ", end="")
                 # print("count: ", end="")
                 # print(count)
-        else:
-            # CASE #2: if there are ZERO mine combinations for the given aggregation (which only occurs if an aggregation
-            # is too large to be probed with local search), then we use combinatorics to figure out the probability of
-            # each tile being safe (much more complicated)
-            print("PLACEHOLDER")
+
+    # find probability of a random tile with no bordering number tiles being safe
+    safe_chance_picking_random_tile = float(0)  # note: still need to implement this calcuation
+
+    # if potential_clicks is empty or the most likely-to-be-safe tile has a safe_chance value that is lower than
+    # safe_chance_picking_random_tile, then we make a semi-educated guess clicking a random tile on the board
+    if len(potential_clicks) == 0:
+        print("PLACEHOLDER")
+        return []
 
     print(time.time() - start)
     return potential_clicks
@@ -96,7 +100,7 @@ mine_combinations = [
         [(4, 4), (1, 4), (1, 3), (5, 1), (1, 1), (1, 0)]
     ]
 ]
-bombs_remaining = 15
+bombs_remaining = 10
 col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450}
 row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280}
 
@@ -117,16 +121,16 @@ row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280}
 # ...
 
 
-# for i in range(len(row_y_coords)):
-#     print(gameboard[i])
-# print()
-#
-#
-# potential_clicks = probabilityEngine(gameboard, col_x_coords, row_y_coords, aggregations, mine_combinations, bombs_remaining)
-# for item in potential_clicks:
-#     print(item)
-# print()
-#
-#
-# for i in range(len(row_y_coords)):
-#     print(gameboard[i])
+for i in range(len(row_y_coords)):
+    print(gameboard[i])
+print()
+
+
+potential_clicks = probabilityEngine(gameboard, col_x_coords, row_y_coords, aggregations, mine_combinations, bombs_remaining)
+for item in potential_clicks:
+    print(item)
+print()
+
+
+for i in range(len(row_y_coords)):
+    print(gameboard[i])
