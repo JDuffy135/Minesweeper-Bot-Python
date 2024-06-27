@@ -13,7 +13,6 @@ process = subprocess.Popen(
 # OTHER NOTE: if you're on a Windows machine, you may need to replace 'python3' with 'python'
 # in the first argument list of subprocess.Popoen (as seen in the lines of code above)
 
-
 def on_press(key):
     global process, keyboard_listener
     if key == keyboard.Key.esc:

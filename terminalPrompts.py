@@ -6,8 +6,18 @@ def run_intro_prompts() -> list:
 
     # initial opening statements
     print("Welcome to Minesweeper Bot, developed by Jake Duffy!")
-    print("To begin, open minesweeper.online and respond to the following prompts in your terminal...")
+    print("To begin, open minesweeper and respond to the following prompts in your terminal...")
     print()
+
+    # prompt 0: ask which website the user is using -> int
+    print("Which Minesweeper website are you using?")
+    print("   Enter '1' for minesweeper.one (DEFAULT - recommended)")
+    print("   Enter '2' for minesweeper.online (not recommended since your IP can get blocked)")
+    website = input()
+    if website == '2':
+        website = 2
+    else:
+        website = 1
 
     # prompt 1: get x-y coordinates of start/restart button -> Point(tuple)
     print("1.) Hover your mouse over the start/restart button and type enter")
@@ -21,14 +31,16 @@ def run_intro_prompts() -> list:
     return_values.append(pyautogui.position())
 
     # prompt 3: get the user's zoom size -> string (integer)
-    print("3.) Enter the zoom size you're using (the integer value next to the drop-down with the magnifying glass)")
-    print("note: recommended value is anywhere in the range 24 to 32 inclusive")
+    print("3.) Enter the zoom size you're using")
+    print("(for minesweeper.online, this will be the number next to the drop-down with the magnifying glass)")
+    print("(for minesweeper.one, the zoom size will be 32 by default, but this changes if you zoom in or out")
     zoom_value = input()
     return_values.append(zoom_value)
 
     # prompt 4: get the user's board size -> string
     print("4.) Enter the board size")
     print("note: enter 'beginner', 'intermediate', 'expert' or '<columns>x<rows>' ('columns' and 'rows' are integers)")
+    print("IMPORTANT NOTE: 'expert' mode on minesweeper.one isn't 30x16 by default, so go to 'custom' mode and make the board size 30x16")
     board_size = input()
     return_values.append(board_size)
 
@@ -57,23 +69,26 @@ def run_intro_prompts() -> list:
     return_values.append(developer_mode)
 
     # prompt 7: number of games -> string
-    print("7.) How many games do you want the bot to play? (default is 10)")
+    print("7.) How many games do you want the bot to play? (default is 100)")
     game_count = input()
     if len(game_count) < 1:
-        game_count = '10'
+        game_count = '100'
     return_values.append(game_count)
+
+    # appending the website value (1 or 2) to end of return_values list
+    return_values.append(website)
 
     # final message
     print()
     print("Reminders before beginning:")
     print()
     print("   * press the escape key at any point to terminate the program")
-    print("   1. make sure your brightness is set to 100% on the website (this is necessary for proper tile detection)")
+    print("   1. if you're using minesweeper.online, use the light theme (this is necessary for tile detection)")
     print("   2. make sure game board is fully in view and completely unobstructed while the bot runs")
     print("   3. don't move your browser window or change it's size while the bot runs")
     print("   4. don't move your mouse while the bot runs")
     print()
-    print("Hit enter whenever you are ready to begin...")
+    print("Press enter whenever you are ready to begin...")
     input()
 
     return return_values

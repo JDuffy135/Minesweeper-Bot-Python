@@ -1,7 +1,7 @@
 import time
 import pyautogui
 
-import tileDetection as tD
+import newTileDetection as td
 
 
 # returns list of number tiles which have at least 1 unrevealed tile not marked as a mine in it's surrounding area
@@ -43,11 +43,16 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
     clicks = []  # will hold at least one tuple (cols, rows) representing the tile(s) to be clicked at end of iteration
 
 
-    # INITIAL STEP: restart board, start timer, click top left tile + update gameboard, update 'unfinished_numbers'
+    # INITIAL STEP: restart board, start timer, click first tile + update gameboard, update 'unfinished_numbers'
     pyautogui.click(restart_coords[0] + 100, restart_coords[1])  # ensures the browser is clicked before starting
     td.restart(gameboard, col_x_coords, row_y_coords, restart_coords)
+    screenshot = td.screenshot_board(zoom_size, col_x_coords, row_y_coords)
+    if responses[7] == 2:
+        loss_status = td.click_tile_and_update_gameboard(gameboard, col_x_coords, row_y_coords, zoom_size, screenshot, (0, 0))
+    else:
+        loss_status = td.click_tile_and_update_gameboard(gameboard, col_x_coords, row_y_coords, zoom_size, screenshot, (2, 2))
+
     start_time = time.time()
-    loss_status = td.click_tile_and_update_gameboard(gameboard, col_x_coords, row_y_coords, zoom_size, 0, 0)
     unfinished_numbers = update_unfinished_numbers(gameboard, col_x_coords, row_y_coords)
 
 

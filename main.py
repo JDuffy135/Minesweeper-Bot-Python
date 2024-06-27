@@ -26,6 +26,7 @@ responses = terminalPrompts.run_intro_prompts()
 # index 4: BOMB COUNT (string)
 # index 5: DEVELOPER MODE (string: 'y' or 'n')
 # index 6: NUMBER OF GAMES TO PLAY (string: default is '10')
+# index 7: WEBSITE (int: 1 is minesweeper.one, 2 is minesweeper.online)
 
 
 # STEP 2: initialize data structures and global variables representing statistics
@@ -50,7 +51,7 @@ guesses = []  # the amount of guesses per game is added here regardless of outco
 print()
 print()
 if responses[5] == 'y':
-    developerMode.run_developer_mode(gameboard, col_x_coords, row_y_coords, responses[0], responses[1], int(responses[2]), bombs_remaining)
+    developerMode.run_developer_mode(gameboard, col_x_coords, row_y_coords, responses[0], responses[1], int(responses[2]), bombs_remaining, int(responses[7]))
     exit()
 
 

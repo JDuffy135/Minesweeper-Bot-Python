@@ -25,24 +25,39 @@ def print_command_list() -> None:
 
 
 # when user enters 'ct' command
-def click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, col_num, row_num, single_click:bool) -> None:
+def click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, col_num, row_num, single_click:bool, site) -> None:
     tile = (col_num, row_num)
     if single_click == False:
         pyautogui.doubleClick(col_x_coords.get(col_num), row_y_coords.get(row_num))
     else:
         pyautogui.click(col_x_coords.get(col_num), row_y_coords.get(row_num))
     screenshot = newTD.screenshot_board(zoom_size, col_x_coords, row_y_coords)
-    screenshot.save(r"/Users/jakeduffy/Desktop/thingy.png")
-    newTD.update_tiles_dev_mode(gameboard, col_x_coords, row_y_coords, tile, zoom_size, screenshot)
+    screenshot.save(r"/Users/jakeduffy/Desktop/thingy.png")  # for testing
+    newTD.update_tiles_dev_mode(gameboard, col_x_coords, row_y_coords, tile, zoom_size, screenshot, site)
     return
 
 
 # when user enters 'dt' command
-def detect_tile(gameboard, col_x_coords, row_y_coords, zoom_size, col_num, row_num) -> None:
+def detect_tile(gameboard, col_x_coords, row_y_coords, zoom_size, col_num, row_num, site) -> None:
     tile = (col_num, row_num)
     screenshot = newTD.screenshot_board(zoom_size, col_x_coords, row_y_coords)
     pyautogui.moveTo(col_x_coords.get(col_num), row_y_coords.get(row_num))  # this is just for show with new tile detection system
-    print(newTD.return_tile_type(zoom_size, col_x_coords, row_y_coords, screenshot, tile))
+    print("tile type: ", end="")
+    print(newTD.return_tile_type(zoom_size, col_x_coords, row_y_coords, screenshot, tile, site))
+    # printing colors found in tile detection
+    margin = int(zoom_size / 5) + 1
+    offset = int(margin / 2)
+    tile_colors = set()
+    x_start = int(zoom_size / 2) + (col_num * zoom_size) - offset
+    x_end = x_start + margin
+    y_start = int(zoom_size / 2) + (row_num * zoom_size) - offset
+    y_end = y_start + margin
+    for x in range(x_start, x_end + 1):
+        for y in range(y_start, y_end + 1):
+            cur_pixel_color = screenshot.getpixel((x, y))
+            tile_colors.add(cur_pixel_color)
+    print("colors found: ", end="")
+    print(tile_colors)
     return
 
 
@@ -63,7 +78,7 @@ def restart(gameboard, col_x_coords, row_y_coords, restart_coords) -> None:
 
 
 # when user enters 'triv' command
-def trivial_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size) -> None:
+def trivial_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, site) -> None:
     # print board before running trivial search
     print("gameboard BEFORE running trivial search...")
     print_board(gameboard, col_x_coords, row_y_coords)
@@ -80,7 +95,7 @@ def trivial_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size) -> None
     # click the tiles which were found to be safe (if any)
     if len(results[1]) > 0:
         for tile in results[1]:
-            click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, tile[0], tile[1], False)
+            click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, tile[0], tile[1], False, site)
     # print board before running trivial search
     print("gameboard AFTER running trivial search...")
     print_board(gameboard, col_x_coords, row_y_coords)
@@ -90,7 +105,7 @@ def trivial_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size) -> None
 
 
 # when user enters 'loc' command
-def local_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, initial_bomb_count) -> None:
+def local_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, initial_bomb_count, site) -> None:
     # print board before running local search
     print("gameboard BEFORE running local search...")
     print_board(gameboard, col_x_coords, row_y_coords)
@@ -128,7 +143,7 @@ def local_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, initial_b
     # click the tiles which were found to be safe (if any)
     if len(results[1]) > 0:
         for tile in results[1]:
-            click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, tile[0], tile[1], False)
+            click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, tile[0], tile[1], False, site)
     # print board after running local search
     print("gameboard AFTER running local search...")
     print_board(gameboard, col_x_coords, row_y_coords)
@@ -147,7 +162,7 @@ def local_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, initial_b
 
     return
 
-def run_developer_mode(gameboard, col_x_coords, row_y_coords, restart_coords, first_tile_coords, zoom_size, bombs_remaining) -> None:
+def run_developer_mode(gameboard, col_x_coords, row_y_coords, restart_coords, first_tile_coords, zoom_size, bombs_remaining, site) -> None:
     print("DEVELOPER MODE ACTIVATED: enter 'q' or press escape to terminate program")
     print()
 
@@ -162,9 +177,9 @@ def run_developer_mode(gameboard, col_x_coords, row_y_coords, restart_coords, fi
             case 'help':
                 print_command_list()
             case 'ct':
-                click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, int(inputs[1]), int(inputs[2]), False)
+                click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, int(inputs[1]), int(inputs[2]), False, site)
             case 'dt':
-                detect_tile(gameboard, col_x_coords, row_y_coords, zoom_size, int(inputs[1]), int(inputs[2]))
+                detect_tile(gameboard, col_x_coords, row_y_coords, zoom_size, int(inputs[1]), int(inputs[2]), site)
             case 'pb':
                 print_board(gameboard, col_x_coords, row_y_coords)
             case 'rs':
@@ -172,8 +187,8 @@ def run_developer_mode(gameboard, col_x_coords, row_y_coords, restart_coords, fi
             case 'un':
                 print(fullAlgorithm.update_unfinished_numbers(gameboard, col_x_coords, row_y_coords))
             case 'triv':
-                trivial_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size)
+                trivial_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, site)
             case 'loc':
-                local_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, bombs_remaining)
+                local_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, bombs_remaining, site)
 
     return
