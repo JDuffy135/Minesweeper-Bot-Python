@@ -54,6 +54,7 @@ if responses[5] == 'y':
     exit()
 
 
-# STEP #4: run algorithm repeatedly until user kills the process, and write current stats to file after each game ends
+# STEP #4: run algorithm repeatedly until user kills the process or until the input number of games are played, and
+# write current stats to file after each game ends
 # for i in range(int(responses[6])):
 #     fullAlgorithm.run_algorithm()

@@ -24,8 +24,6 @@ def return_tile_type(zoom_size: int) -> int:
             return 9
         match tup:
             case (0, 13, 248, 255):
-                # end_time = time.time()
-                # print(end_time - start_time)
                 return 1
             case (0, 12, 239, 255):
                 return 1

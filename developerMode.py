@@ -1,9 +1,11 @@
 import pyautogui
 
-import tileDetection as tD
+# import tileDetection as tD  # original tile detection system which was kinda booty cheeks tbh
+import newTileDetection as newTD
 import trivialSearch as triv
 import localSearch as loc
-# import probabilityEngine as prob
+import probabilityEngine as PE
+import bestGuess as BG
 import fullAlgorithm
 
 
@@ -18,25 +20,29 @@ def print_command_list() -> None:
     print("   4.) 'rs': clicks the restart button and clears gameboard in memory")
     print("   5.) 'un': returns unfinished numbers list for current gameboard setup")
     print("   6.) 'triv': runs trivial search on the current board")
-    print("   7.) 'loc': runs local search on the current board")
-    print("   8.) 'prob': runs the probability engine on the current board")
+    print("   7.) 'loc': runs local search on the current board + probability engine and best guess if local search doesn't yield any moves")
     return
 
 
 # when user enters 'ct' command
 def click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, col_num, row_num, single_click:bool) -> None:
+    tile = (col_num, row_num)
     if single_click == False:
         pyautogui.doubleClick(col_x_coords.get(col_num), row_y_coords.get(row_num))
     else:
         pyautogui.click(col_x_coords.get(col_num), row_y_coords.get(row_num))
-    tD.update_tiles_dev_mode(gameboard, col_x_coords, row_y_coords, col_num, row_num, zoom_size)
+    screenshot = newTD.screenshot_board(zoom_size, col_x_coords, row_y_coords)
+    screenshot.save(r"/Users/jakeduffy/Desktop/thingy.png")
+    newTD.update_tiles_dev_mode(gameboard, col_x_coords, row_y_coords, tile, zoom_size, screenshot)
     return
 
 
 # when user enters 'dt' command
 def detect_tile(gameboard, col_x_coords, row_y_coords, zoom_size, col_num, row_num) -> None:
-    pyautogui.moveTo(col_x_coords.get(col_num), row_y_coords.get(row_num))
-    print(tD.return_tile_type(zoom_size))
+    tile = (col_num, row_num)
+    screenshot = newTD.screenshot_board(zoom_size, col_x_coords, row_y_coords)
+    pyautogui.moveTo(col_x_coords.get(col_num), row_y_coords.get(row_num))  # this is just for show with new tile detection system
+    print(newTD.return_tile_type(zoom_size, col_x_coords, row_y_coords, screenshot, tile))
     return
 
 
@@ -123,16 +129,22 @@ def local_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, initial_b
     if len(results[1]) > 0:
         for tile in results[1]:
             click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, tile[0], tile[1], False)
-    # print board before running local search
+    # print board after running local search
     print("gameboard AFTER running local search...")
     print_board(gameboard, col_x_coords, row_y_coords)
     print()
+    # if local search didn't grant any moves, run probability engine and find best guess
+    if results[0] == 0 and len(results[1]) == 0:
+        potential_clicks = PE.probabilityEngine(gameboard, col_x_coords, row_y_coords, results[2], results[3], unfinished_numbers)
+        best_guess = BG.best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, results[2], unfinished_numbers, bombs_remaining)
 
-    return
+        print("potential clicks from probability engine...")
+        for item in potential_clicks:
+            print(item)
+        print()
+        print("best guess: ",end="")
+        print(best_guess)
 
-
-# when user enters 'prob' command
-def probability_engine_dev(gameboard, col_x_coords, row_y_coords, restart_coords) -> None:
     return
 
 def run_developer_mode(gameboard, col_x_coords, row_y_coords, restart_coords, first_tile_coords, zoom_size, bombs_remaining) -> None:
@@ -163,7 +175,5 @@ def run_developer_mode(gameboard, col_x_coords, row_y_coords, restart_coords, fi
                 trivial_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size)
             case 'loc':
                 local_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, bombs_remaining)
-            case 'prob':
-                print("PLACEHOLDER")
 
     return

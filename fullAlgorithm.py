@@ -63,18 +63,14 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
         # ...
 
 
-        # 3.) PROBABILITY ENGINE: at this point, create the priority queue 'potential_clicks,' as no moves are guaranteed
+        # 3.) PROBABILITY ENGINE
         # ...
 
 
-        # 4.) BRUTE FORCE
-        # ...
+        # 4.) BEST GUESS
 
 
-        # 5.) DEEP ANALYSIS
-
-
-        # 6.) FINAL STEP
+        # 5.) MAKE MOVE
         # ...
 
     end_time = time.time()
