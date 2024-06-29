@@ -32,7 +32,6 @@ def click_tile(gameboard, col_x_coords, row_y_coords, zoom_size, col_num, row_nu
     else:
         pyautogui.click(col_x_coords.get(col_num), row_y_coords.get(row_num))
     screenshot = newTD.screenshot_board(zoom_size, col_x_coords, row_y_coords)
-    screenshot.save(r"/Users/jakeduffy/Desktop/thingy.png")  # for testing
     newTD.update_tiles_dev_mode(gameboard, col_x_coords, row_y_coords, tile, zoom_size, screenshot, site)
     return
 
@@ -158,7 +157,7 @@ def local_search_dev(gameboard, col_x_coords, row_y_coords, zoom_size, initial_b
             print(item)
         print()
         print("best guess: ",end="")
-        print(best_guess)
+        print(best_guess[0])
 
     return
 

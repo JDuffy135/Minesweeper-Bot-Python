@@ -235,10 +235,11 @@ def update_tiles(gameboard, col_x_coords, row_y_coords, tile, zoom_size, screens
 
 
 # clicks specified tile and updates gameboard respectively, plus returns a 1 if a mine is clicked (0 otherwise)
-def click_tile_and_update_board(gameboard, col_x_coords, row_y_coords, zoom_size, tile, screenshot, site) -> int:
+def click_tile_and_update_board(gameboard, col_x_coords, row_y_coords, zoom_size, tile, site) -> int:
     col_num = tile[0]
     row_num = tile[1]
     pyautogui.click(col_x_coords.get(col_num), row_y_coords.get(row_num))
+    screenshot = screenshot_board(zoom_size, col_x_coords, row_y_coords)
     loss_status = update_tiles(gameboard, col_x_coords, row_y_coords, tile, zoom_size, screenshot, site)
     return loss_status
 
@@ -268,7 +269,6 @@ def restart(gameboard, col_x_coords, row_y_coords, restart_coords) -> None:
 #
 # # testing new tile detection with screenshot of entire board
 # image = screenshot_board(zoom_size, col_x_coords, row_y_coords)
-# print(image.save(r"/Users/jakeduffy/Desktop/thingy.png"))
 # start = time.time()
 #
 # print(return_tile_type(zoom_size, col_x_coords, row_y_coords, image, (1, 1)))

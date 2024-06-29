@@ -1,0 +1,16 @@
+CURRENT METRICS AFTER 60 GAMES:
+
+Win Rate: 0.4166666666666667   [after 25 wins and 35 losses]
+Losses Occurring In <= 18 Seconds: 11
+Losses Occurring In >= 45 Seconds: 14
+Total No-Guess Wins: 4
+Average Time: 43.519349813461304
+Average Win Time: 57.39196857452393
+Local Search Losses: 0
+Guess Success Rate (overall): 0.7976878612716763   [after 173 guesses]
+Guess Type 1 Success Rate: 0.7972972972972973   [after 74 guesses]
+Guess Type 2 Success Rate: 0.8888888888888888   [after 18 guesses]
+Guess Type 3 Success Rate: 0.6666666666666666   [after 3 guesses]
+Guess Type 4 Success Rate: 0.7792207792207793   [after 77 guesses]
+Guess Type 5 Success Rate: 0.0   [after 0 guesses]
+Guess Type 6 Success Rate: 1.0   [after 1 guesses]

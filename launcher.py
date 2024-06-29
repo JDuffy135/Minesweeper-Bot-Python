@@ -5,6 +5,7 @@ from pynput import keyboard
 # and replace PROJECT_PATH with this path
 
 PROJECT_PATH = '/Users/jakeduffy/PycharmProjects/MinesweeperBot'
+
 process = subprocess.Popen(
     ['python3', 'main.py'],
     cwd=PROJECT_PATH,

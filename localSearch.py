@@ -330,22 +330,19 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
     start = time.time()
     mine_tiles = []
     click_tiles = []
-    # endgame_threshold = 4  # when bombs_remaining is less than this value, we can use end-game optimizations
+    endgame_threshold = 5  # when bombs_remaining is less than this value, we can use end-game optimizations
 
     # STEP 0: initializing bool value for end-game optimizations
     endgame = False
-    num_of_closed_tiles = 0
-    for c in range(len(col_x_coords)):
-        for r in range(len(row_y_coords)):
-            if gameboard[r][c] == -1:
-                num_of_closed_tiles = num_of_closed_tiles + 1
+    # num_of_closed_tiles = 0
+    # for c in range(len(col_x_coords)):
+    #     for r in range(len(row_y_coords)):
+    #         if gameboard[r][c] == -1:
+    #             num_of_closed_tiles = num_of_closed_tiles + 1
 
-    # if (bombs_remaining < endgame_threshold) and (num_of_closed_tiles < 22):
+    # if num_of_closed_tiles < 22 and bombs_remaining < endgame_threshold:
+    #     print("END GAME MODE ACTIVATED")  # for testing
     #     endgame = True
-
-    if num_of_closed_tiles < 22:
-        print("END GAME MODE ACTIVATED")  # for testing
-        endgame = True
 
 
     # STEP 1: make list of border tiles + END-GAME OPTIMIZATION #1
