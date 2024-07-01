@@ -190,11 +190,21 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
     print()
 
 
+    # SPECIAL CASE: EARLY-GAME CORNER CLICK
+
+    if gameboard[0][len(col_x_coords) - 1] == -1:
+        if len(potential_clicks) == 0 or (potential_clicks[0][2] < 0.8 and closed_tiles_left > (int(len(col_x_coords) * len(row_y_coords) * 0.60))):
+            print("SPECIAL CASE GUESS: top right corner")  # for testing
+            final_guess = (len(col_x_coords) - 1, 0)
+            guess_type = 2
+            return [final_guess, guess_type]
+
+
     # WORST CASE: SEMI-EDUCATED GUESS (a tile not found in potential_clicks will be returned)
 
     # if potential_clicks is 1.) empty, or 2.) the most-likely-to-be-safe tile (potential_clicks[0]) has a safe_chance
     # value that is less than the safe_chance_picking_random_tile value, then we make a semi-educated guess
-    if len(potential_clicks) == 0 or (potential_clicks[0][2] < safe_chance_picking_random_tile and potential_clicks[0][2] < 0.73):
+    if len(potential_clicks) == 0 or (potential_clicks[0][2] < safe_chance_picking_random_tile and potential_clicks[0][2] < 0.75):
 
         # CASE #1: if we have aggregation(s) that were too large to be probed with local search, click a tile from
         # one of these aggregations with the highest utility (if the effective utility is 2 or less)
@@ -248,9 +258,9 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
                 return [final_guess, guess_type]
 
 
-        # CASE #2: if less than 20% of the board has been cleared, or if len(potential_clicks) <= 2 and/or the safest
+        # CASE #2: if less than 25% of the board has been cleared, or if len(potential_clicks) <= 2 and/or the safest
         # tile is less safe than clicking a random tile, then we click a corner tile (if one remains unopened)
-        if (closed_tiles_left > int(len(col_x_coords) * len(row_y_coords) * 0.8)) or ((len(potential_clicks) <= 2 or potential_clicks[0][2] < safe_chance_picking_random_tile)):
+        if (closed_tiles_left > int(len(col_x_coords) * len(row_y_coords) * 0.75)) or ((len(potential_clicks) <= 2 or potential_clicks[0][2] < safe_chance_picking_random_tile)):
             corners = [(len(col_x_coords) - 1, 0), (0, len(row_y_coords) - 1),(len(col_x_coords) - 1, len(row_y_coords) - 1)]
             for corner in corners:
                 if gameboard[corner[1]][corner[0]] == -1:
@@ -304,17 +314,17 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
 
     choice_1 = potential_clicks[0]  # safest tile with highest utility
     choice_2 = return_second_safest_tile(potential_clicks)  # second safest tile with highest utility
-    if (choice_2 != None) and (choice_2[3] > choice_1[3] + 2) and (choice_1[2] - choice_2[2] < 0.09) and (choice_2[2] >= 0.66):
+    if (choice_2 != None) and (choice_2[3] > choice_1[3] + 2) and (choice_1[2] - choice_2[2] < 0.09) and (choice_2[2] >= 0.71):
         # basically, if the second safest tile's utility value is at least 3 higher than the safest tile's utility,
-        # there is less than a 9% difference in safe_chance, and the safe_chance value of the second safest tile is
-        # at least 66%, then the second safest tile is returned
+        # there is less than an 8% difference in safe_chance, and the safe_chance value of the second safest tile is
+        # at least 71%, then the second safest tile is returned
         print("BEST GUESS: second safest tile with 3+ higher utility")  # for testing
         final_guess = (choice_2[0], choice_2[1])
-        guess_type = 4
-    elif (choice_2 != None) and (choice_2[3] > choice_1[3] + 1) and (choice_1[2] - choice_2[2] < 0.07) and (choice_2[2] >= 0.70):
+        guess_type = 5
+    elif (choice_2 != None) and (choice_2[3] > choice_1[3] + 1) and (choice_1[2] - choice_2[2] < 0.05) and (choice_2[2] >= 0.73):
         # basically, if the second safest tile's utility value is at least 2 higher than the safest tile's utility,
-        # there is less than an 7% difference in safe_chance, and the safe_chance value of the second safest tile is
-        # at least 70%, then the second safest tile is returned
+        # there is less than a 5% difference in safe_chance, and the safe_chance value of the second safest tile is
+        # at least 73%, then the second safest tile is returned
         print("BEST GUESS: second safest tile with 2+ higher utility")  # for testing
         final_guess = (choice_2[0], choice_2[1])
         guess_type = 6

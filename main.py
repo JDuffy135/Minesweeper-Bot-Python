@@ -8,8 +8,10 @@ import developerMode
 import initializeDataStructures as initDS
 import fullAlgorithm
 
+# v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v v
 # IMPORTANT NOTE: don't run this file directly, as you run the risk of falling into an infinite loop - instead,
 # run the program from the file 'launcher.py'
+# ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^
 
 
 # for testing screen coordinate values
@@ -30,16 +32,12 @@ responses = terminalPrompts.run_intro_prompts()
 # index 7: WEBSITE (int: 1 is minesweeper.one, 2 is minesweeper.online)
 
 
-# STEP 2: initialize data structures and global variables representing statistics
+# STEP 2: initialize data structures
 col_x_coords = initDS.return_coord_map_cols(int(responses[2]), responses[1], responses[3])  # dict
 row_y_coords = initDS.return_coord_map_rows(int(responses[2]), responses[1], responses[3])  # dict
 gameboard = initDS.return_gameboard(responses[3])  # 2D list
 responses[3] = initDS.return_board_size(responses[3])  # converts board size into a tuple of form (cols, rows)
 bombs_remaining = int(responses[4])
-total_wins, total_losses, total_guesses, avg_win_time, avg_loss_time = 0, 0, 0, 0, 0
-win_times = []  # when a win occurs, the total runtime is added here
-loss_times = []  # when a loss occurs, the total runtime is added here
-guesses = []  # the amount of guesses per game is added here regardless of outcome
 
 
 # for testing colors
@@ -62,13 +60,16 @@ if responses[5] == 'y':
 # metrics
 wins = 0
 losses = 0
-short_losses = 0  # losses that occur in under 18 seconds
+short_losses = 0  # losses that occur in under 15 seconds
 long_losses = 0  # losses that occur in over 45 seconds
+infinite_loops = 0
 times = []
 win_times = []
 total_moves = 0
 total_guesses = 0
 total_guess_losses = 0
+successful_50_50_guesses = 0
+total_50_50_guess_losses = 0
 lowest_eff_util_guesses = 0             # guess_type 1 (total guesses)
 guess_type_1_losses = 0
 corner_guesses = 0                      # guess_type 2 (total guesses)
@@ -82,9 +83,11 @@ guess_type_5_losses = 0
 second_safest_tile_2util_guesses = 0    # guess_type 6 (total guesses)
 guess_type_6_losses = 0
 local_search_losses = 0
+trivial_search_losses = 0
+final_step_losses = 0
 total_no_guess_wins = 0
 
-# calculated metrics
+# derived metrics
 win_rate = float(0)  # wins / (wins + losses)
 average_time = float(0)
 average_win_time = float(0)
@@ -116,7 +119,7 @@ for i in range(int(responses[6])):
     # wins & losses
     if results[0] == 1:
         losses = losses + 1
-        if results[1] <= 18:
+        if results[1] <= 15:
             short_losses = short_losses + 1
         elif results[1] >= 45:
             long_losses = long_losses + 1
@@ -144,10 +147,14 @@ for i in range(int(responses[6])):
     second_safest_tile_3util_guesses = second_safest_tile_3util_guesses + results[8]
     # second_safest_tile_2util_guesses
     second_safest_tile_2util_guesses = second_safest_tile_2util_guesses + results[9]
-    # updating local_search_losses if necessary (should never be incremented unless something is fucked up)
+    # updating local_search_losses and trivial_search_losses (should remain at 0)
     last_step = results[11]
     if results[0] == 1 and last_step == 2:
         local_search_losses = local_search_losses + 1
+    elif results[0] == 1 and last_step == 1:
+        trivial_search_losses = trivial_search_losses + 1
+    elif results[0] == 1 and last_step == 0:
+        final_step_losses = final_step_losses + 1
     # updating guess type losses if necessary
     last_guess_type = results[10]
     if last_step == 4 and results[0] == 1:
@@ -166,6 +173,14 @@ for i in range(int(responses[6])):
                 guess_type_5_losses = guess_type_5_losses + 1
             case 6:
                 guess_type_6_losses = guess_type_6_losses + 1
+    # update total_50_50_guess_losses if necessary
+    if results[12] == 1:
+        total_50_50_guess_losses = total_50_50_guess_losses + 1
+    # update successful_50_50_guesses
+    successful_50_50_guesses = successful_50_50_guesses + results[13]
+    # infinite loops
+    if results[14] == 1:
+        infinite_loops = infinite_loops + 1
     # win rate
     if wins >= 1 and losses == 0:
         win_rate = float(1)
@@ -220,7 +235,7 @@ for i in range(int(responses[6])):
     else:
         guess_type_6_success_rate = float((second_safest_tile_2util_guesses - guess_type_6_losses) / second_safest_tile_2util_guesses)
 
-    # OUTPUT METRIC TO FILE (metrics.txt)
+    # OUTPUT METRICS TO FILE (metrics.txt)
     file = open("metrics.txt", "w")
     file.write("")
     file.close()
@@ -238,16 +253,40 @@ for i in range(int(responses[6])):
     file.write(str(losses))
     file.write(" losses]\n")
     # short_losses
-    file.write("Losses Occurring In <= 18 Seconds: ")
+    file.write("Losses Occurring In <= 15 Seconds: ")
     file.write(str(short_losses))
     file.write("\n")
     # long_losses
     file.write("Losses Occurring In >= 45 Seconds: ")
     file.write(str(long_losses))
     file.write("\n")
+    # infinite_loops
+    file.write("Infinite Loops: ")
+    file.write(str(infinite_loops))
+    file.write("\n")
     # total_no_guess_wins
     file.write("Total No-Guess Wins: ")
     file.write(str(total_no_guess_wins))
+    file.write("\n")
+    # total_50_50_guess_losses
+    file.write("Total 50-50 Guess Losses: ")
+    file.write(str(total_50_50_guess_losses))
+    file.write("\n")
+    # successful_50_50_guesses
+    file.write("Total Successful 50-50 Guesses: ")
+    file.write(str(successful_50_50_guesses))
+    file.write("\n")
+    # trivial_search_losses
+    file.write("Trivial Search Losses: ")
+    file.write(str(trivial_search_losses))
+    file.write("\n")
+    # local_search_losses
+    file.write("Local Search Losses: ")
+    file.write(str(local_search_losses))
+    file.write("\n")
+    # final_step_losses
+    file.write("Final Step Losses: ")
+    file.write(str(final_step_losses))
     file.write("\n")
     # average_time
     file.write("Average Time: ")
@@ -256,10 +295,6 @@ for i in range(int(responses[6])):
     # average_win_time
     file.write("Average Win Time: ")
     file.write(str(average_win_time))
-    file.write("\n")
-    # local_search_losses
-    file.write("Local Search Losses: ")
-    file.write(str(local_search_losses))
     file.write("\n")
     # overall_guess_success_rate
     file.write("Guess Success Rate (overall): ")

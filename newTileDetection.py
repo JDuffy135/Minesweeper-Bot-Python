@@ -96,7 +96,7 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
         #         return 9
         # checking for number 8
         for color in tile_colors:
-            if (color[0] >= 100 and color[1] >= 100 and color[2] >= 100) and (color[0] <= 130 and color[1] <= 130 and color[2] <= 130) and (color[0] == color[1] and color[0] == color[2]):
+            if (color[0] >= 115 and color[1] >= 115 and color[2] >= 115) and (color[0] <= 133 and color[1] <= 133 and color[2] <= 133) and (color[0] == color[1] and color[0] == color[2]):
                 return 8
         # now checking for numbers 1 - 7
         for color in tile_colors:

@@ -17,7 +17,7 @@ def return_border_tiles(gameboard, col_x_coords, row_y_coords, unfinished_number
     return border_tiles
 
 
-# when there are only a few mines remaining on the board, we check all remaining closed tiles in local search
+# when there are only a few closed tiles left on the board, we check all remaining closed tiles in local search
 def return_border_tiles_endgame(gameboard, col_x_coords, row_y_coords) -> list:
     border_tiles = []
     for c in range(len(col_x_coords)):
@@ -189,16 +189,6 @@ def is_oversatisfied(gameboard, col_x_coords, row_y_coords, tile) -> bool:
     return (mines_found > tile_number)
 
 
-# if the given tile has a number tile in it's surrounding area, return True (False otherwise)
-def has_number_tile(gameboard, col_x_coords, row_y_coords, tile) -> bool:
-    for c in range(tile[0] - 1, tile[0] + 2):
-        for r in range(tile[1] - 1, tile[1] + 2):
-            if (c >= 0 and c < len(col_x_coords)) and (r >= 0 and r < len(row_y_coords)):
-                if gameboard[r][c] > 0 and gameboard[r][c] < 9:
-                    return True
-    return False
-
-
 # used in find_all_bomb_combinations backtracking algorithm to check if a particular mine combination is valid
 # note: a combination is valid if none of the surrounding number tiles are oversatisfied (ex: 3 bombs around a 2 tile)
 def is_valid_mine_placement(gameboard, aggregation, col_x_coords, row_y_coords, combination) -> bool:
@@ -223,13 +213,6 @@ def is_valid_mine_placement(gameboard, aggregation, col_x_coords, row_y_coords, 
     for number_tile in bordering_number_tiles:
         if is_oversatisfied(tmp_gameboard, col_x_coords, row_y_coords, number_tile) == True:
             return False
-
-    # for every mine, check that there is at least one number tile in it's surrounding area - if not, return False
-    # NOTE: almost certainly arbitrary in any real game scenario, but I put this in as a safety mechanism just in case
-    for mine_tile in combination:
-        if mine_tile != (0, 0) and mine_tile != (0, len(row_y_coords) - 1) and mine_tile != (len(col_x_coords) - 1, 0) and mine_tile != (len(col_x_coords) - 1, len(row_y_coords) - 1):
-            if has_number_tile(tmp_gameboard, col_x_coords, row_y_coords, mine_tile) == False:
-                return False
 
     return True
 
@@ -330,19 +313,18 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
     start = time.time()
     mine_tiles = []
     click_tiles = []
-    endgame_threshold = 5  # when bombs_remaining is less than this value, we can use end-game optimizations
 
     # STEP 0: initializing bool value for end-game optimizations
     endgame = False
-    # num_of_closed_tiles = 0
-    # for c in range(len(col_x_coords)):
-    #     for r in range(len(row_y_coords)):
-    #         if gameboard[r][c] == -1:
-    #             num_of_closed_tiles = num_of_closed_tiles + 1
+    num_of_closed_tiles = 0
+    for c in range(len(col_x_coords)):
+        for r in range(len(row_y_coords)):
+            if gameboard[r][c] == -1:
+                num_of_closed_tiles = num_of_closed_tiles + 1
 
-    # if num_of_closed_tiles < 22 and bombs_remaining < endgame_threshold:
-    #     print("END GAME MODE ACTIVATED")  # for testing
-    #     endgame = True
+    if num_of_closed_tiles < 22:
+        print("END GAME MODE ACTIVATED")  # for testing
+        endgame = True
 
 
     # STEP 1: make list of border tiles + END-GAME OPTIMIZATION #1
@@ -386,20 +368,8 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
                     agg.remove(agg[index])
                 else:
                     index = index + 1
-    # elif endgame == True and aggregation_count == 1:
-    #     for agg in mine_combinations:
-    #         index = 0
-    #         while index < len(agg):
-    #             if len(agg[index]) != bombs_remaining:
-    #                 # print("REMOVED AGGREGATION OF SIZE ", end="")  # for testing
-    #                 # print(len(agg[index]))  # for testing
-    #                 agg.remove(agg[index])
-    #             else:
-    #                 index = index + 1
-    # if endgame == True and len(mine_combinations[0]) == 0:
-    #     # NOTE: this is only for testing - this shouldn't occur in real games
-    #     print("not a valid game board")
-    #     return [-1, [], aggregations, [[]]]
+        print("total valid endgame mine combinations: ", end="")  # for testing
+        print(len(mine_combinations[0]))  # for testing
 
 
     # FOR TESTING
@@ -579,14 +549,30 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 # ]
 # col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450}
 # row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280}
-
-
+#
+#
+# # GAME BOARD #6
+# # expected output with bombs_remaining set to 3: [0, [...], ...]
+# gameboard = [
+#     [-1, -1, -1, -1, -1, -1],
+#     [-1, -1,  9, -1, -1,  9],
+#     [ 2,  3,  0,  2,  3,  9],
+#     [ 0,  9,  0,  0,  0,  0],
+# ]
+# unfinished_numbers = [
+# ]
+# col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450}
+# row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250}
+#
+#
+#
+#
 # for i in range(len(row_y_coords)):
 #     print(gameboard[i])
 # print()
 #
 #
-# results = local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, 10)
+# results = local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, 3)
 # print()
 # print(results)
 # print("^^ LOCAL SEARCH FUNCTION RESULTS: [mines marked, click tiles, aggregations, mine combinations]")

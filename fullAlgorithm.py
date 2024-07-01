@@ -15,19 +15,28 @@ def update_unfinished_numbers(gameboard, col_x_coords, row_y_coords) -> list[tup
         for c in range(len(col_x_coords)):
             if gameboard[r][c] <= 0 or gameboard[r][c] > 8:
                 continue
-            flag = 0
+            break_flag = 0
             # if tile is a number tile, we check all adjacent tiles to see if it should be added to the list
             for x in range(c-1, c+2):
-                if flag == 1:
+                if break_flag == 1:
                     break
                 for y in range(r-1, r+2):
                     if (x >= 0 and x < len(col_x_coords)) and (y >= 0 and y < len(row_y_coords)):
                         if gameboard[y][x] == -1:
                             unfinished_numbers.append((c, r))
-                            flag = 1
+                            break_flag = 1
                             break
-    # print(len(unfinished_numbers))
+    # print(len(unfinished_numbers))  # for testing
     return unfinished_numbers
+
+
+def return_remaining_tiles(gameboard, col_x_coords, row_y_coords) -> list[tuple]:
+    remaining_tiles = []
+    for r in range(len(row_y_coords)):
+        for c in range(len(col_x_coords)):
+            if gameboard[r][c] == -1:
+                remaining_tiles.append((c, r))
+    return remaining_tiles
 
 
 # runs the full algorithm from start to finish on the current game board displayed on user's screen and returns a
@@ -44,6 +53,8 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
     last_step = -1  # tracks which step of the aglorithm last fired before making the last move
     total_moves = 0
     total_guesses = 0
+    successful_fifty_fifty_guesses = 0
+    fifty_fifty_guess_loss = 0
     # types of guesses
     lowest_eff_util_guesses = 0             # guess_type 1
     corner_guesses = 0                      # guess_type 2
@@ -71,17 +82,51 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
     # note: loop runs until either 1.) unfinished_numbers is empty or 2.) a mine is clicked (return early in this case)
     start_time = time.time()
     unfinished_numbers = [(-1, -1)]  # this is only here so the while loop executes the first time
-    while len(unfinished_numbers) > 0:
-        print("NEW ITERATION")
-        # initialize variables
+    iterations = 0
+    while bombs_remaining > -1:
+        print("NEW ITERATION")  # for testing
+        iterations = iterations + 1
+
+        # INITIALIZING VARIABLES & UPDATE unfinished_numbers
         flag = 0  # set to 1 whenever a move is made (AKA when a mine is placed and/or a tile is clicked)
         last_step = -1
         click_tiles = []  # tiles that will be clicked at the end of the current iteration
         unfinished_numbers = update_unfinished_numbers(gameboard, col_x_coords, row_y_coords)
-        if len(unfinished_numbers) == 0:
+
+
+        # CHECK IF GAME SHOULD END
+        if bombs_remaining == 0:
+            # if any tiles remain to be clicked, we click them
+            remaining_tiles = return_remaining_tiles(gameboard, col_x_coords, row_y_coords)
+            total_moves = total_moves + 1
+            last_step = 0
+            for tile in remaining_tiles:
+                loss_status = td.click_tile_and_update_board(gameboard, col_x_coords, row_y_coords, zoom_size, tile, site)
+                if loss_status == 1:
+                    break
             break
-        # print("unfinished_numbers: ", end="")  # for testing
-        # print(unfinished_numbers)  # for testing
+
+
+        # CHECKING FOR INFINITE LOOP
+        if iterations >= 120:
+            [
+                1,
+                end_time - start_time,
+                999,
+                total_guesses,
+                lowest_eff_util_guesses,
+                corner_guesses,
+                random_tile_guesses,
+                safest_tile_guesses,
+                second_safest_tile_3util_guesses,
+                second_safest_tile_2util_guesses,
+                last_guess_type,
+                last_step,
+                fifty_fifty_guess_loss,
+                successful_fifty_fifty_guesses,
+                1
+            ]
+            return
 
 
         # 1.) TRIVIAL SEARCH
@@ -101,8 +146,8 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
         mine_combinations = []
         if flag == 0:
             LS_RESULT = LS.local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bombs_remaining)
-            # print("LS_RESULT: ", end="")  # for testing
-            # print(LS_RESULT)  # for testing
+            print("LS_RESULT: ", end="")  # for testing
+            print(LS_RESULT)  # for testing
             if LS_RESULT[0] != 0 or len(LS_RESULT[1]) > 0:
                 bombs_remaining = bombs_remaining - LS_RESULT[0]
                 click_tiles.extend(LS_RESULT[1])
@@ -153,13 +198,26 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
         for tile in click_tiles:
             loss_status = td.click_tile_and_update_board(gameboard, col_x_coords, row_y_coords, zoom_size, tile, site)
             if loss_status == 1:
+                # checking for a 50-50 loss
+                for pot_click in potential_clicks:
+                    if (pot_click[0], pot_click[1]) == (tile[0], tile[1]) and pot_click[2] <= 0.5 and pot_click[2] > 0.49:
+                        fifty_fifty_guess_loss = 1
+                        break
                 break
+            else:
+                # checking for successful 50-50 scenarios
+                for pot_click in potential_clicks:
+                    if (pot_click[0], pot_click[1]) == (tile[0], tile[1]) and pot_click[2] <= 0.5 and pot_click[2] > 0.49:
+                        successful_fifty_fifty_guesses = successful_fifty_fifty_guesses + 1
+                        break
+
         # break out of the while loop and terminate the algorithm for the current game by returning
         if loss_status == 1:
             break
 
 
     end_time = time.time()
+    infinite_loop = 0
     return [
         loss_status,
         end_time - start_time,
@@ -172,5 +230,8 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
         second_safest_tile_3util_guesses,
         second_safest_tile_2util_guesses,
         last_guess_type,
-        last_step
+        last_step,
+        fifty_fifty_guess_loss,
+        successful_fifty_fifty_guesses,
+        infinite_loop
     ]
