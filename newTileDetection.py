@@ -18,7 +18,7 @@ def screenshot_board(zoom_size: int, col_x_coords: dict, row_y_coords: dict):
 # if the function returns -2, then none of the known tiles were detected
 def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, screenshot, tile: tuple[int, int], site: int) -> int:
     # obtaining pixel colors of given tile
-    margin = int(zoom_size / 5) + 1
+    margin = int(zoom_size / 5) + 2
     offset = int(margin / 2)
     col = tile[0]
     row = tile[1]
@@ -88,12 +88,8 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                 return 0
     else:  # tile detection for minesweeper.one
         # checking if a bomb is detected at the given tile coordinate
-        for color in tile_colors:
-            if color == (16, 16, 16, 255):
-                return 9
-        # for color in tile_colors:
-        #     if (color[0] > 0 and color[1] > 0 and color[2] > 0) and (color[0] < 20 and color[1] < 20 and color[2] < 20):
-        #         return 9
+        if ((16, 16, 16, 255) in tile_colors or (14, 14, 14, 255) in tile_colors or (0, 0, 0, 255) in tile_colors) and (255, 255, 255, 255) in tile_colors:
+            return 9
         # checking for number 8
         for color in tile_colors:
             if (color[0] >= 115 and color[1] >= 115 and color[2] >= 115) and (color[0] <= 133 and color[1] <= 133 and color[2] <= 133) and (color[0] == color[1] and color[0] == color[2]):
@@ -105,29 +101,47 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                     return 1
                 case (79, 87, 219, 255):
                     return 1
+                case (61, 61, 239, 255):
+                    return 1
                 case (0, 111, 21, 255):
                     return 2
                 case (11, 115, 31):
+                    return 2
+                case (33, 123, 0, 255):
+                    return 2
+                case (54, 135, 52, 255):
                     return 2
                 case (255, 7, 27, 255):
                     return 3
                 case (236, 51, 66, 255):
                     return 3
+                case (229, 58, 71, 255):
+                    return 3
                 case (0, 6, 109, 255):
                     return 4
                 case (34, 39, 123, 255):
                     return 4
+                case (10, 3, 123, 255):
+                    return 4
                 case (117, 3, 12, 255):
+                    return 5
+                case (123, 2, 2, 255):
+                    return 5
+                case (127, 10, 20, 255):
                     return 5
                 case (0, 112, 111, 255):
                     return 6
                 case (45, 129, 128, 255):
                     return 6
+                case (37, 123, 123, 255):
+                    return 6
                 case (0, 0, 0, 255):
+                    return 7
+                case (51, 51, 51, 255):
                     return 7
         # if not a number or bomb, we must distinguish between an open or closed space by checking the colors
         # near the top of the given tile (to see if pure white is present)
-        if (181, 181, 181, 255) in tile_colors and len(tile_colors) < 3:
+        if ((181, 181, 181, 255) in tile_colors or (189, 189, 189, 255) in tile_colors) and len(tile_colors) < 2:
             new_colors = set()
             x_start = int(zoom_size / 2) + (col * zoom_size) - offset
             x_end = x_start + margin

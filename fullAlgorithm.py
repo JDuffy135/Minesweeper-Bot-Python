@@ -108,7 +108,8 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
 
 
         # CHECKING FOR INFINITE LOOP
-        if iterations >= 120:
+        if iterations >= 100:
+            end_time = time.time()
             [
                 1,
                 end_time - start_time,
@@ -155,6 +156,9 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
                 flag = 1
             else:
                 aggregations = LS_RESULT[2]
+                print("aggregation sizes:")  # for testing
+                for agg in aggregations:  # for testing
+                    print(len(agg))  # for testing
                 mine_combinations = LS_RESULT[3]
 
 

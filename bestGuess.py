@@ -64,7 +64,7 @@ def insert_into_pq_border_tile(pq, tile, gameboard, col_x_coords, row_y_coords, 
 
 # compiles all border tiles into a priority queue based on utility and effective_utility values in a 3x3 range for each tile
 def return_all_border_tiles_utility(gameboard, col_x_coords, row_y_coords, unfinished_numbers, aggregations) -> list[tuple]:
-    all_border_tiles = []  # entry format: (col, row, effective_utility)
+    all_border_tiles = []  # entry format: (col, row, utility, effective_utility)
     visited_tiles = []
     for i in range(len(aggregations)):
         for tile in aggregations[i]:
@@ -156,14 +156,14 @@ def return_sub_aggregation(gameboard, col_x_coords, row_y_coords, aggregations, 
     return sub_aggregation
 
 
-# returns the second safest tile in potential_clicks if one exists (returns None otherwise)
-def return_second_safest_tile(potential_clicks) -> tuple:
-    highest_safe_chance = potential_clicks[0][2]
-    for tile in potential_clicks:
-        cur_safety_chance = tile[2]
-        if cur_safety_chance < highest_safe_chance:
-            return tile
-    return None
+# # returns the second safest tile in potential_clicks if one exists (returns None otherwise)
+# def return_second_safest_tile(potential_clicks) -> tuple:
+#     highest_safe_chance = potential_clicks[0][2]
+#     for tile in potential_clicks:
+#         cur_safety_chance = tile[2]
+#         if cur_safety_chance < highest_safe_chance:
+#             return tile
+#     return None
 
 
 # after probability engine runs, the best_guess function returns the tile with the highest chance of progressing the
@@ -179,8 +179,17 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
         for c in range(len(col_x_coords)):
             if gameboard[r][c] != -1:
                 closed_tiles_left = closed_tiles_left - 1
+    safe_chance_picking_random_tile = 1.0 - float((bombs_remaining / closed_tiles_left)) - 0.0075
 
-    safe_chance_picking_random_tile = 1.0 - float((bombs_remaining / closed_tiles_left)) - 0.01
+    # corner click threshold value
+    corner_click_threshold = 0.73  # threshold for corner click to be valid if all corners (not including top left) are open
+    if gameboard[0][len(col_x_coords) - 1] != -1 or gameboard[len(row_y_coords) - 1][0] != -1 or gameboard[len(row_y_coords) - 1][len(col_x_coords) - 1] != -1:
+        corner_click_threshold = 0.68  # threshold value if only 2 or less corners are open
+    # if gameboard[0][len(col_x_coords) - 1] != -1 and (gameboard[len(row_y_coords) - 1][0] != -1 or gameboard[len(row_y_coords) - 1][len(col_x_coords) - 1] != -1):
+    #     corner_click_threshold = 0.66  # threshold value if only 1 corner is open
+
+    # semi educated guess threshold value
+    semi_educated_guess_threshold = 0.73
 
     print()
     print("SAFE CHANCE PICKING RANDOM TILE: ", end="")
@@ -190,23 +199,28 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
     print()
 
 
-    # SPECIAL CASE: EARLY-GAME CORNER CLICK
+    # SEMI-EDUCATED GUESS #1: guess type 2 (a corner tile will be returned if one remains)
 
-    if gameboard[0][len(col_x_coords) - 1] == -1:
-        if len(potential_clicks) == 0 or (potential_clicks[0][2] < 0.8 and closed_tiles_left > (int(len(col_x_coords) * len(row_y_coords) * 0.60))):
-            print("SPECIAL CASE GUESS: top right corner")  # for testing
-            final_guess = (len(col_x_coords) - 1, 0)
-            guess_type = 2
-            return [final_guess, guess_type]
+    # in the event that 1.) potential_clicks is empty, or 2.) the safest tile is less safe than the corner_click_threshold
+    # value, then we click a corner tile (as long as less than 40% of the board has been uncovered)
+    if len(potential_clicks) == 0 or (potential_clicks[0][2] < corner_click_threshold):
+        if (closed_tiles_left > int(len(col_x_coords) * len(row_y_coords) * 0.6)):
+            corners = [(len(col_x_coords) - 1, 0), (0, len(row_y_coords) - 1), (len(col_x_coords) - 1, len(row_y_coords) - 1)]
+            for corner in corners:
+                if gameboard[corner[1]][corner[0]] == -1:
+                    print("SEMI-EDUCATED GUESS: corner guess")  # for testing
+                    final_guess = corner
+                    guess_type = 2
+                    return [final_guess, guess_type]
 
 
-    # WORST CASE: SEMI-EDUCATED GUESS (a tile not found in potential_clicks will be returned)
+    # SEMI-EDUCATED GUESS #2: guess types 1 & 3 (a tile not found in potential_clicks will be returned)
 
-    # if potential_clicks is 1.) empty, or 2.) the most-likely-to-be-safe tile (potential_clicks[0]) has a safe_chance
-    # value that is less than the safe_chance_picking_random_tile value, then we make a semi-educated guess
-    if len(potential_clicks) == 0 or (potential_clicks[0][2] < safe_chance_picking_random_tile and potential_clicks[0][2] < 0.75):
+    # in the event that 1.) potential_clicks is empty, or 2.) the safest tile is both less safe than picking a random
+    # tile and less than 73% safe, then we resort to guess types 1 & 3
+    if len(potential_clicks) == 0 or (potential_clicks[0][2] < safe_chance_picking_random_tile and potential_clicks[0][2] < semi_educated_guess_threshold):
 
-        # CASE #1: if we have aggregation(s) that were too large to be probed with local search, click a tile from
+        # GUESS TYPE 1: if we have aggregation(s) that were too large to be probed with local search, click a tile from
         # one of these aggregations with the highest utility (if the effective utility is 2 or less)
         num_of_large_aggs = 0
         for aggregation in aggregations:
@@ -224,15 +238,15 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
                 for pot_tile in potential_clicks:
                     if (pot_tile[0], pot_tile[1]) == cur_tile:
                         tmp_flag = 1
-                        print("   REMOVED TILE ", end="")
-                        print(cur_tile, end="")
-                        print(" FROM ALL_BORDER_TILES")
+                        # print("   REMOVED TILE ", end="")
+                        # print(cur_tile, end="")
+                        # print(" FROM ALL_BORDER_TILES")
                         all_border_tiles.pop(cur_index)
                         break
                 if tmp_flag == 0:
                     cur_index = cur_index + 1
-            print("ALL BORDER TILES...")  # for testing
-            print(all_border_tiles)  # for testing
+            # print("ALL BORDER TILES...")  # for testing
+            # print(all_border_tiles)  # for testing
 
             # set up guesses
             first_guess = all_border_tiles[0]  # border tile with highest utility and lowest effective utility
@@ -258,33 +272,8 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
                 return [final_guess, guess_type]
 
 
-        # CASE #2: if less than 25% of the board has been cleared, or if len(potential_clicks) <= 2 and/or the safest
-        # tile is less safe than clicking a random tile, then we click a corner tile (if one remains unopened)
-        if (closed_tiles_left > int(len(col_x_coords) * len(row_y_coords) * 0.75)) or ((len(potential_clicks) <= 2 or potential_clicks[0][2] < safe_chance_picking_random_tile)):
-            corners = [(len(col_x_coords) - 1, 0), (0, len(row_y_coords) - 1),(len(col_x_coords) - 1, len(row_y_coords) - 1)]
-            for corner in corners:
-                if gameboard[corner[1]][corner[0]] == -1:
-                    print("SEMI-EDUCATED GUESS: corner guess")  # for testing
-                    final_guess = corner
-                    guess_type = 2
-                    return [final_guess, guess_type]
-
-
-        # CASE #3: find a tile 2 tiles away from an unfinished number tile with highest utility and highest effective utility
-        # create sub-aggregation (closed tiles that are touching the arregation tiles)
-        # sub_aggregation = return_sub_aggregation(gameboard, col_x_coords, row_y_coords, aggregations, unfinished_numbers)
-        # print("SUB-AGGREGATION...")  # for testing
-        # print(sub_aggregation)  # for testing
-        # # if sub_aggregation isn't empty, we choose the first item as our final_guess value and return
-        #  # (other wise we repeat this process for another aggregation)
-        # if len(sub_aggregation) != 0:
-        #     final_guess = (sub_aggregation[0][0], sub_aggregation[0][1])
-        #     print("SEMI-EDUCATED GUESS: 2 tiles from unfinished number tile")  # for testing
-        #     return final_guess
-
-
-        # SAFETY CASE: if we get to this point in the code, we choose a random tile on the board as a last-ditch effort
-        # (note that we remove tiles from this list if they are in potential_clicks and safe_chance < 0.66)
+        # GUESS TYPE 3: if we get to this point in the code, we choose a random tile on the board as a last-ditch effort
+        # (note that we remove tiles from this list if they are in potential_clicks and safe_chance < safe_chance_picking_random_tile)
         print("SEMI-EDUCATED GUESS: random tile")  # for testing
         remaining_tiles_list = []
         # populating list
@@ -295,7 +284,7 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
         # removing elements
         if len(potential_clicks) < len(remaining_tiles_list):
             for item in potential_clicks:
-                if item[2] < 0.66 and ((item[0], item[1]) in remaining_tiles_list):
+                if item[2] < safe_chance_picking_random_tile and ((item[0], item[1]) in remaining_tiles_list):
                     print("removed element from remaining tiles list")
                     remaining_tiles_list.remove((item[0], item[1]))
         # picking random tile
@@ -310,30 +299,51 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
         return [final_guess, guess_type]
 
 
+        # REMOVED CASE
+        # find a tile 2 tiles away from an unfinished number tile with highest utility and highest effective utility
+        # create sub-aggregation (closed tiles that are touching the arregation tiles)
+        # sub_aggregation = return_sub_aggregation(gameboard, col_x_coords, row_y_coords, aggregations, unfinished_numbers)
+        # print("SUB-AGGREGATION...")  # for testing
+        # print(sub_aggregation)  # for testing
+        # # if sub_aggregation isn't empty, we choose the first item as our final_guess value and return
+        #  # (other wise we repeat this process for another aggregation)
+        # if len(sub_aggregation) != 0:
+        #     final_guess = (sub_aggregation[0][0], sub_aggregation[0][1])
+        #     print("SEMI-EDUCATED GUESS: 2 tiles from unfinished number tile")  # for testing
+        #     return final_guess
+
+
     # BEST CASE: EDUCATED GUESS (a border tile from potential_clicks will be returned)
 
     choice_1 = potential_clicks[0]  # safest tile with highest utility
-    choice_2 = return_second_safest_tile(potential_clicks)  # second safest tile with highest utility
-    if (choice_2 != None) and (choice_2[3] > choice_1[3] + 2) and (choice_1[2] - choice_2[2] < 0.09) and (choice_2[2] >= 0.71):
-        # basically, if the second safest tile's utility value is at least 3 higher than the safest tile's utility,
-        # there is less than an 8% difference in safe_chance, and the safe_chance value of the second safest tile is
-        # at least 71%, then the second safest tile is returned
-        print("BEST GUESS: second safest tile with 3+ higher utility")  # for testing
-        final_guess = (choice_2[0], choice_2[1])
-        guess_type = 5
-    elif (choice_2 != None) and (choice_2[3] > choice_1[3] + 1) and (choice_1[2] - choice_2[2] < 0.05) and (choice_2[2] >= 0.73):
-        # basically, if the second safest tile's utility value is at least 2 higher than the safest tile's utility,
-        # there is less than a 5% difference in safe_chance, and the safe_chance value of the second safest tile is
-        # at least 73%, then the second safest tile is returned
-        print("BEST GUESS: second safest tile with 2+ higher utility")  # for testing
-        final_guess = (choice_2[0], choice_2[1])
-        guess_type = 6
-    else:
-        # in this case (most cases), the safest tile with the highest utility is returned
-        print("BEST GUESS: safest tile")  # for testing
-        final_guess = (choice_1[0], choice_1[1])
-        guess_type = 4
+    # choice_2 = return_second_safest_tile(potential_clicks)  # second safest tile with highest utility
 
+    # checking to see if a guess type 5 or 6 is valid
+    for i in range(1, len(potential_clicks)):
+        choice_2 = potential_clicks[i]
+        if choice_2[2] < 0.72:
+            break
+        if (choice_2 != None) and (choice_2[3] > choice_1[3] + 2) and (choice_1[2] - choice_2[2] < 0.08) and (choice_2[2] >= 0.75):
+            # basically, if the second safest tile's utility value is at least 3 higher than the safest tile's utility,
+            # there is less than an 8% difference in safe_chance, and the safe_chance value of the second safest tile is
+            # at least 75%, then the second safest tile is returned
+            print("BEST GUESS: second safest tile with 3+ higher utility")  # for testing
+            final_guess = (choice_2[0], choice_2[1])
+            guess_type = 5
+            return [final_guess, guess_type]
+        elif (choice_2 != None) and (choice_2[3] > choice_1[3] + 1) and (choice_1[2] - choice_2[2] < 0.07) and (choice_2[2] >= 0.73):
+            # basically, if the second safest tile's utility value is at least 2 higher than the safest tile's utility,
+            # there is less than an 7% difference in safe_chance, and the safe_chance value of the second safest tile is
+            # at least 73% safe, then the second safest tile is returned
+            print("BEST GUESS: second safest tile with 2+ higher utility")  # for testing
+            final_guess = (choice_2[0], choice_2[1])
+            guess_type = 6
+            return [final_guess, guess_type]
+
+    # if guess types 5 and 6 weren't valid, we return the safest tile (this will happen in most cases)
+    print("BEST GUESS: safest tile")  # for testing
+    final_guess = (choice_1[0], choice_1[1])
+    guess_type = 4
 
     return [final_guess, guess_type]
 

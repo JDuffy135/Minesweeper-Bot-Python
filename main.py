@@ -67,6 +67,7 @@ times = []
 win_times = []
 total_moves = 0
 total_guesses = 0
+total_winning_game_guesses = 0
 total_guess_losses = 0
 successful_50_50_guesses = 0
 total_50_50_guess_losses = 0
@@ -89,6 +90,7 @@ total_no_guess_wins = 0
 
 # derived metrics
 win_rate = float(0)  # wins / (wins + losses)
+average_guesses_for_winning_game = float(0)  # total_winning_game_guesses / wins
 average_time = float(0)
 average_win_time = float(0)
 overall_guess_success_rate = float(0)  # (total_guesses - total_guess_losses) / total_guesses
@@ -130,8 +132,10 @@ for i in range(int(responses[6])):
     times.append(results[1])
     # total_moves
     total_moves = total_moves + results[2]
-    # total_guesses
+    # total_guesses and total_winning_game_guesses
     total_guesses = total_guesses + results[3]
+    if results[0] == 0:
+        total_winning_game_guesses = total_winning_game_guesses + results[3]
     # total_no_guess_wins
     if results[3] == 0 and results[0] == 0:
         total_no_guess_wins = total_no_guess_wins + 1
@@ -188,6 +192,11 @@ for i in range(int(responses[6])):
         win_rate = float(0)
     else:
         win_rate = float(wins / (wins + losses))
+    # average_guesses_for_winning_game
+    if wins == 0 or total_winning_game_guesses == 0:
+        average_guesses_for_winning_game = float(0)
+    else:
+        average_guesses_for_winning_game = float(total_winning_game_guesses / wins)
     # average overall time
     average_time = float(0)
     for t in times:
@@ -295,6 +304,10 @@ for i in range(int(responses[6])):
     # average_win_time
     file.write("Average Win Time: ")
     file.write(str(average_win_time))
+    file.write("\n")
+    # average_guesses_for_winning_game
+    file.write("Average Guesses Per Win: ")
+    file.write(str(average_guesses_for_winning_game))
     file.write("\n")
     # overall_guess_success_rate
     file.write("Guess Success Rate (overall): ")
