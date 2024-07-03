@@ -55,6 +55,7 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
     total_guesses = 0
     successful_fifty_fifty_guesses = 0
     fifty_fifty_guess_loss = 0
+    large_aggregation_occurrences = 0
     # types of guesses
     lowest_eff_util_guesses = 0             # guess_type 1
     corner_guesses = 0                      # guess_type 2
@@ -75,7 +76,7 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
         loss_status = td.click_tile_and_update_board(gameboard, col_x_coords, row_y_coords, zoom_size, (0, 0), site)
     else:
         # minesweeper.one
-        loss_status = td.click_tile_and_update_board(gameboard, col_x_coords, row_y_coords, zoom_size, (2, 2), site)
+        loss_status = td.click_tile_and_update_board(gameboard, col_x_coords, row_y_coords, zoom_size, (3, 3), site)
 
 
     # THE AGLORITHM...
@@ -95,15 +96,18 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
 
 
         # CHECK IF GAME SHOULD END
+        remaining_tiles = return_remaining_tiles(gameboard, col_x_coords, row_y_coords)
         if bombs_remaining == 0:
             # if any tiles remain to be clicked, we click them
-            remaining_tiles = return_remaining_tiles(gameboard, col_x_coords, row_y_coords)
             total_moves = total_moves + 1
             last_step = 0
             for tile in remaining_tiles:
                 loss_status = td.click_tile_and_update_board(gameboard, col_x_coords, row_y_coords, zoom_size, tile, site)
                 if loss_status == 1:
                     break
+            break
+        elif remaining_tiles == 0 or (remaining_tiles == bombs_remaining):
+            last_step = 0
             break
 
 
@@ -156,10 +160,12 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
                 flag = 1
             else:
                 aggregations = LS_RESULT[2]
-                print("aggregation sizes:")  # for testing
-                for agg in aggregations:  # for testing
-                    print(len(agg))  # for testing
                 mine_combinations = LS_RESULT[3]
+
+            for aggregation in LS_RESULT[2]:
+                if len(aggregation) > 21:
+                    large_aggregation_occurrences = large_aggregation_occurrences + 1
+                    break
 
 
         # 3.) PROBABILITY ENGINE
@@ -237,5 +243,6 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
         last_step,
         fifty_fifty_guess_loss,
         successful_fifty_fifty_guesses,
-        infinite_loop
+        infinite_loop,
+        large_aggregation_occurrences
     ]

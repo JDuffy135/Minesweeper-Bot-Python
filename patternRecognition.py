@@ -1,3 +1,14 @@
+# if the given tile is a number tile, return True (return False otherwise)
+def is_number(gameboard, tile) -> bool:
+    if tile[1] >= len(gameboard) or tile[0] >= len(gameboard[0]) or tile[0] < 0 or tile[1] < 0:
+        # out of bounds check
+        return False
+    if gameboard[tile[1]][tile[0]] > 0 and gameboard[tile[1]][tile[0]] < 9:
+        # checking if number tile
+        return True
+    # return False if not number tile
+    return False
+
 # if a vertical pattern is found, check if closed tiles are to the right (1) or to the left (0) of the input tile
 # (if neither side is clear: return -1, and if both are clear: return -2)
 # NOTE: 'tiles' list should include every tile in the pattern
@@ -606,6 +617,97 @@ def pattern_recognition(gameboard:list[list[int]], col_x_coords:dict, row_y_coor
                         stop_flag = 0
                         break
 
+            # 2e.) check for 1-1-X and X-1-1 patterns...
+            if ((t[0] + 1, t[1], 1) in eff_nums):
+                # ONE
+                # ?  1  1  X
+                # W -1 -1  C
+                if is_number(gameboard, (t[0] + 2, t[1])) and (t[0] == 0 or is_number(gameboard, (t[0] - 1, t[1] + 1))):
+                    if t[1] < len(row_y_coords) - 1 and gameboard[t[1] + 1][t[0]] == -1 and gameboard[t[1] + 1][t[0] + 1] == -1 and gameboard[t[1] + 1][t[0] + 2] == -1:
+                        if (t[0] + 2, t[1] + 1) not in click_tiles:
+                            click_tiles.append((t[0] + 2, t[1] + 1))
+                            stop_flag = 0
+                            break
+
+                # TWO
+                # W -1 -1  C
+                # ?  1  1  X
+                if is_number(gameboard, (t[0] + 2, t[1])) and (t[0] == 0 or is_number(gameboard, (t[0] - 1, t[1] - 1))):
+                    if t[1] > 0 and gameboard[t[1] - 1][t[0]] == -1 and gameboard[t[1] - 1][t[0] + 1] == -1 and gameboard[t[1] - 1][t[0] + 2] == -1:
+                        if (t[0] + 2, t[1] - 1) not in click_tiles:
+                            click_tiles.append((t[0] + 2, t[1] - 1))
+                            stop_flag = 0
+                            break
+
+                # THREE
+                # X  1  1  ?
+                # C -1 -1  W
+                if is_number(gameboard, (t[0] - 1, t[1])) and (t[0] + 1 == len(col_x_coords) - 1 or is_number(gameboard, (t[0] + 2, t[1] + 1))):
+                    if t[1] < len(row_y_coords) - 1 and gameboard[t[1] + 1][t[0] - 1] == -1 and gameboard[t[1] + 1][t[0]] == -1 and gameboard[t[1] + 1][t[0] + 1] == -1:
+                        if (t[0] - 1, t[1] + 1) not in click_tiles:
+                            click_tiles.append((t[0] - 1, t[1] + 1))
+                            stop_flag = 0
+                            break
+
+                # FOUR
+                # C -1 -1  W
+                # X  1  1  ?
+                if is_number(gameboard, (t[0] - 1, t[1])) and (t[0] + 1 == len(col_x_coords) - 1 or is_number(gameboard, (t[0] + 2, t[1] - 1))):
+                    if t[1] > 0 and gameboard[t[1] - 1][t[0] - 1] == -1 and gameboard[t[1] - 1][t[0]] == -1 and gameboard[t[1] - 1][t[0] + 1] == -1:
+                        if (t[0] - 1, t[1] - 1) not in click_tiles:
+                            click_tiles.append((t[0] - 1, t[1] - 1))
+                            stop_flag = 0
+                            break
+
+            if ((t[0], t[1] - 1, 1) in eff_nums):
+                # FIVE
+                #  W ?
+                # -1 1
+                # -1 1
+                #  C X
+                if is_number(gameboard, (t[0], t[1] + 1)) and (t[1] - 1 == 0 or is_number(gameboard, (t[0] - 1, t[1] - 2))):
+                    if t[0] > 0 and gameboard[t[1] - 1][t[0] - 1] == -1 and gameboard[t[1]][t[0] - 1] == -1 and gameboard[t[1] + 1][t[0] - 1] == -1:
+                        if (t[0] - 1, t[1] + 1) not in click_tiles:
+                            click_tiles.append((t[0] - 1, t[1] + 1))
+                            stop_flag = 0
+                            break
+
+                # SIX
+                # ?  W
+                # 1 -1
+                # 1 -1
+                # X  C
+                if is_number(gameboard, (t[0], t[1] + 1)) and (t[1] - 1 == 0 or is_number(gameboard, (t[0] + 1, t[1] - 2))):
+                    if t[0] < len(col_x_coords) - 1 and gameboard[t[1] - 1][t[0] + 1] == -1 and gameboard[t[1]][t[0] + 1] == -1 and gameboard[t[1] + 1][t[0] + 1] == -1:
+                        if (t[0] + 1, t[1] + 1) not in click_tiles:
+                            click_tiles.append((t[0] + 1, t[1] + 1))
+                            stop_flag = 0
+                            break
+
+                # SEVEN
+                #  C X
+                # -1 1
+                # -1 1
+                #  W ?
+                if is_number(gameboard, (t[0], t[1] - 2)) and (t[1] == len(row_y_coords) - 1 or is_number(gameboard, (t[0] - 1, t[1] + 1))):
+                    if t[0] > 0 and gameboard[t[1]][t[0] - 1] == -1 and gameboard[t[1] - 1][t[0] - 1] == -1 and gameboard[t[1] - 2][t[0] - 1] == -1:
+                        if (t[0] - 1, t[1] - 2) not in click_tiles:
+                            click_tiles.append((t[0] - 1, t[1] - 2))
+                            stop_flag = 0
+                            break
+
+                # EIGHT
+                # X  C
+                # 1 -1
+                # 1 -1
+                # ?  W
+                if is_number(gameboard, (t[0], t[1] - 2)) and (t[1] == len(row_y_coords) - 1 or is_number(gameboard, (t[0] + 1, t[1] + 1))):
+                    if t[0] < len(col_x_coords) - 1 and gameboard[t[1]][t[0] + 1] == -1 and gameboard[t[1] - 1][t[0] + 1] == -1 and gameboard[t[1] - 2][t[0] + 1] == -1:
+                        if (t[0] + 1, t[1] - 2) not in click_tiles:
+                            click_tiles.append((t[0] + 1, t[1] - 2))
+                            stop_flag = 0
+                            break
+
     # print("OUT OF WHILE LOOP")  # for testing
 
     # NOTE: if no moves will be made, this returned list will contain 2 empty lists
@@ -643,25 +745,27 @@ def pattern_recognition(gameboard:list[list[int]], col_x_coords:dict, row_y_coor
 # GAME BOARD #2
 # gameboard = [
 #     [-1, -1, -1, -1, -1, -1, -1],
-#     [-1, -1, -1, -1, 1, 0, -1],
-#     [-1, -1, -1, -1, 2, 0, -1],
-#     [-1, -1, -1, -1, 2, 0, 0],
-#     [-1, -1, -1, -1, 2, 2, 1],
-#     [-1, -1, -1, -1, -1, -1, -1]
+#     [-1, -1, -1, -1, -1, -1, -1],
+#     [ 2, -1, -1, -1, -1, -1,  1],
+#     [ 1, -1, -1, -1, -1, -1,  1],
+#     [ 1, -1, -1, -1, -1, -1,  1],
+#     [ 0, 2, -1, -1, -1,  2,  0],
 # ]
 # bordering_unfinished_numbers = [
-#     (4, 4),
-#     (4, 3),
-#     (4, 2),
-#     (4, 1),
-#     (5, 4),
-#     (6, 4)
+#     (6, 2),
+#     (6, 3),
+#     (6, 4),
+#     (5, 5),
+#     (0, 2),
+#     (0, 3),
+#     (0, 4),
+#     (1, 5)
 # ]
 # col_x_coords = {0: 300, 1: 330, 2: 360, 3: 390, 4: 420, 5: 450, 6: 480}
 # row_y_coords = {0: 160, 1: 190, 2: 220, 3: 250, 4: 280, 5: 310}
 # bombs_remaining = 15
-#
-#
+
+
 # for i in range(len(row_y_coords)):
 #     print(gameboard[i])
 # print()

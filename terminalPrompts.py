@@ -40,7 +40,7 @@ def run_intro_prompts() -> list:
     # prompt 4: get the user's board size -> string
     print("4.) Enter the board size")
     print("note: enter 'beginner', 'intermediate', 'expert' or '<columns>x<rows>' ('columns' and 'rows' are integers)")
-    print("IMPORTANT NOTE: 'expert' mode on minesweeper.one isn't 30x16 by default, so go to 'custom' mode and make the board size 30x16")
+    print("IMPORTANT NOTE: 'expert' and 'beginner' modes need to be typed in manually on 'custom' mode if using minesweeper.one")
     board_size = input()
     return_values.append(board_size)
 

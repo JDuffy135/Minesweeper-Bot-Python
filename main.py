@@ -63,6 +63,7 @@ losses = 0
 short_losses = 0  # losses that occur in under 15 seconds
 long_losses = 0  # losses that occur in over 45 seconds
 infinite_loops = 0
+large_aggregation_occurrences = 0  # number of times where there's at least 1 aggregation too large to be probed by local search
 times = []
 win_times = []
 total_moves = 0
@@ -130,6 +131,8 @@ for i in range(int(responses[6])):
         win_times.append(results[1])
     # times
     times.append(results[1])
+    # large aggregation occurrences
+    large_aggregation_occurrences = large_aggregation_occurrences + results[15]
     # total_moves
     total_moves = total_moves + results[2]
     # total_guesses and total_winning_game_guesses
@@ -284,6 +287,10 @@ for i in range(int(responses[6])):
     # successful_50_50_guesses
     file.write("Total Successful 50-50 Guesses: ")
     file.write(str(successful_50_50_guesses))
+    file.write("\n")
+    # large_aggregation_occurrences
+    file.write("Total Large Aggregation Occurrences: ")
+    file.write(str(large_aggregation_occurrences))
     file.write("\n")
     # trivial_search_losses
     file.write("Trivial Search Losses: ")

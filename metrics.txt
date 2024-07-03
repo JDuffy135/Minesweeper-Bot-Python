@@ -1,22 +1,23 @@
-CURRENT METRICS AFTER 254 GAMES:
+CURRENT METRICS AFTER 1000 GAMES:
 
-Win Rate: 0.33858267716535434   [after 86 wins and 168 losses]
-Losses Occurring In <= 15 Seconds: 36
-Losses Occurring In >= 45 Seconds: 78
+Win Rate: 0.388   [after 388 wins and 612 losses]
+Losses Occurring In <= 15 Seconds: 141
+Losses Occurring In >= 45 Seconds: 257
 Infinite Loops: 0
-Total No-Guess Wins: 26
-Total 50-50 Guess Losses: 24
-Total Successful 50-50 Guesses: 25
-Trivial Search Losses: 4
+Total No-Guess Wins: 123
+Total 50-50 Guess Losses: 97
+Total Successful 50-50 Guesses: 134
+Total Large Aggregation Occurrences: 2219
+Trivial Search Losses: 9
 Local Search Losses: 0
 Final Step Losses: 0
-Average Time: 47.3612538322689
-Average Win Time: 64.18167495727539
-Average Guesses Per Win: 2.5348837209302326
-Guess Success Rate (overall): 0.7476923076923077   [after 650 guesses]
-Guess Type 1 Success Rate: 0.816793893129771   [after 131 guesses]
-Guess Type 2 Success Rate: 0.8333333333333334   [after 114 guesses]
-Guess Type 3 Success Rate: 0.9   [after 20 guesses]
-Guess Type 4 Success Rate: 0.6943699731903485   [after 373 guesses]
-Guess Type 5 Success Rate: 1.0   [after 2 guesses]
-Guess Type 6 Success Rate: 0.5   [after 10 guesses]
+Average Time: 47.997029499292374
+Average Win Time: 62.72684628631651
+Average Guesses Per Win: 2.079896907216495
+Guess Success Rate (overall): 0.75   [after 2412 guesses]
+Guess Type 1 Success Rate: 0.7408123791102514   [after 517 guesses]
+Guess Type 2 Success Rate: 0.7886977886977887   [after 407 guesses]
+Guess Type 3 Success Rate: 0.8382352941176471   [after 68 guesses]
+Guess Type 4 Success Rate: 0.7383845604002859   [after 1399 guesses]
+Guess Type 5 Success Rate: 0.5   [after 6 guesses]
+Guess Type 6 Success Rate: 0.8   [after 15 guesses]
