@@ -322,10 +322,10 @@ def best_guess(gameboard, col_x_coords, row_y_coords, potential_clicks, aggregat
         choice_2 = potential_clicks[i]
         if choice_2[2] < 0.75:
             break
-        if (choice_2 != None) and (choice_2[3] > choice_1[3] + 2) and (choice_1[2] - choice_2[2] < 0.07) and (choice_2[2] >= 0.77):
+        if (choice_2 != None) and (choice_2[3] > choice_1[3] + 2) and (choice_1[2] - choice_2[2] < 0.07) and (choice_2[2] >= 0.78):
             # basically, if the second safest tile's utility value is at least 3 higher than the safest tile's utility,
             # there is less than a 7% difference in safe_chance, and the safe_chance value of the second safest tile is
-            # at least 77%, then the second safest tile is returned
+            # at least 78%, then the second safest tile is returned
             print("BEST GUESS: second safest tile with 3+ higher utility")  # for testing
             final_guess = (choice_2[0], choice_2[1])
             guess_type = 5

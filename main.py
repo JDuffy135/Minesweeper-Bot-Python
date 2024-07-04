@@ -63,7 +63,9 @@ losses = 0
 short_losses = 0  # losses that occur in under 15 seconds
 long_losses = 0  # losses that occur in over 45 seconds
 infinite_loops = 0
+invalid_games = 0
 large_aggregation_occurrences = 0  # number of times where there's at least 1 aggregation too large to be probed by local search
+subset_elimination_instances = 0
 times = []
 win_times = []
 total_moves = 0
@@ -133,6 +135,8 @@ for i in range(int(responses[6])):
     times.append(results[1])
     # large aggregation occurrences
     large_aggregation_occurrences = large_aggregation_occurrences + results[15]
+    # subset elimination instances
+    subset_elimination_instances = subset_elimination_instances + results[16]
     # total_moves
     total_moves = total_moves + results[2]
     # total_guesses and total_winning_game_guesses
@@ -188,6 +192,9 @@ for i in range(int(responses[6])):
     # infinite loops
     if results[14] == 1:
         infinite_loops = infinite_loops + 1
+    # invalid games
+    if results[17] == 1:
+        invalid_games = invalid_games + 1
     # win rate
     if wins >= 1 and losses == 0:
         win_rate = float(1)
@@ -273,8 +280,12 @@ for i in range(int(responses[6])):
     file.write(str(long_losses))
     file.write("\n")
     # infinite_loops
-    file.write("Infinite Loops: ")
+    file.write("Infinite Loops (counted as losses): ")
     file.write(str(infinite_loops))
+    file.write("\n")
+    # invalid_games
+    file.write("Invalid Games (counted as losses): ")
+    file.write(str(invalid_games))
     file.write("\n")
     # total_no_guess_wins
     file.write("Total No-Guess Wins: ")
@@ -291,6 +302,10 @@ for i in range(int(responses[6])):
     # large_aggregation_occurrences
     file.write("Total Large Aggregation Occurrences: ")
     file.write(str(large_aggregation_occurrences))
+    file.write("\n")
+    # subset_elimination_instances
+    file.write("Subset Elimination Instances: ")
+    file.write(str(subset_elimination_instances))
     file.write("\n")
     # trivial_search_losses
     file.write("Trivial Search Losses: ")

@@ -56,6 +56,8 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
     successful_fifty_fifty_guesses = 0
     fifty_fifty_guess_loss = 0
     large_aggregation_occurrences = 0
+    subset_elimination_instances = 0
+    invalid_game = 0
     # types of guesses
     lowest_eff_util_guesses = 0             # guess_type 1
     corner_guesses = 0                      # guess_type 2
@@ -84,7 +86,7 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
     start_time = time.time()
     unfinished_numbers = [(-1, -1)]  # this is only here so the while loop executes the first time
     iterations = 0
-    while bombs_remaining > -1:
+    while bombs_remaining > -99:
         print("NEW ITERATION")  # for testing
         iterations = iterations + 1
 
@@ -106,15 +108,13 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
                 if loss_status == 1:
                     break
             break
-        elif remaining_tiles == 0 or (remaining_tiles == bombs_remaining):
+        elif (len(remaining_tiles) == 0 and bombs_remaining == 0) or (len(remaining_tiles) == bombs_remaining):
             last_step = 0
             break
-
-
-        # CHECKING FOR INFINITE LOOP
-        if iterations >= 100:
-            end_time = time.time()
-            [
+        elif len(remaining_tiles) == 0 and bombs_remaining != 0:
+            print("INVALID GAME (note: counts as loss)")
+            invalid_game = 1
+            invalid_result = [
                 1,
                 end_time - start_time,
                 999,
@@ -129,9 +129,38 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
                 last_step,
                 fifty_fifty_guess_loss,
                 successful_fifty_fifty_guesses,
-                1
+                0,
+                large_aggregation_occurrences,
+                subset_elimination_instances,
+                invalid_game
             ]
-            return
+            return invalid_result
+
+
+        # CHECKING FOR INFINITE LOOP
+        if iterations >= (len(col_x_coords) * len(row_y_coords)):
+            end_time = time.time()
+            inf_result = [
+                1,
+                end_time - start_time,
+                999,
+                total_guesses,
+                lowest_eff_util_guesses,
+                corner_guesses,
+                random_tile_guesses,
+                safest_tile_guesses,
+                second_safest_tile_3util_guesses,
+                second_safest_tile_2util_guesses,
+                last_guess_type,
+                last_step,
+                fifty_fifty_guess_loss,
+                successful_fifty_fifty_guesses,
+                1,
+                large_aggregation_occurrences,
+                subset_elimination_instances,
+                invalid_game
+            ]
+            return inf_result
 
 
         # 1.) TRIVIAL SEARCH
@@ -166,6 +195,8 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
                 if len(aggregation) > 21:
                     large_aggregation_occurrences = large_aggregation_occurrences + 1
                     break
+            if LS_RESULT[4] == 1:
+                subset_elimination_instances = subset_elimination_instances + 1
 
 
         # 3.) PROBABILITY ENGINE
@@ -228,6 +259,7 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
 
     end_time = time.time()
     infinite_loop = 0
+    invalid_game = 0
     return [
         loss_status,
         end_time - start_time,
@@ -244,5 +276,7 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
         fifty_fifty_guess_loss,
         successful_fifty_fifty_guesses,
         infinite_loop,
-        large_aggregation_occurrences
+        large_aggregation_occurrences,
+        subset_elimination_instances,
+        invalid_game
     ]

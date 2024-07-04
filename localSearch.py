@@ -1,6 +1,7 @@
 import time
 import copy
 import patternRecognition as pR
+import subsetElimination as sE
 
 
 # returns adjacent tiles which are marked as closed for each tile in unfinished_numbers
@@ -415,19 +416,47 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
     # STEP 5: for each aggregation that is too large to be probed with local search (AKA aggregations of size 22+), we
     # pass them into the pattern recognition function to see if there are any guaranteed moves we can make without
     # computing all the possible mine combinations
+    next_move_flag = 0
+    large_aggs = 0
     for i in range(len(aggregations)):
         if len(aggregations[i]) >= 22:
+            large_aggs = large_aggs + 1
             bordering_unfinished_numbers = set()
             for border_tile in aggregations[i]:
                 cur_set = return_bordering_unfinished_numbers(gameboard, col_x_coords, row_y_coords, unfinished_numbers, border_tile)
                 bordering_unfinished_numbers.update(cur_set)
             result = pR.pattern_recognition(gameboard, col_x_coords, row_y_coords, list(bordering_unfinished_numbers), bombs_remaining - len(mine_tiles))
+            if len(result[0]) > 0 or len(result[1]) > 0:
+                next_move_flag = 1
             mine_tiles.extend(result[0])
             click_tiles.extend(result[1])
 
+    # return early if at least 1 pattern was found in step 5 or if no large aggregations exist
+    # if next_move_flag == 1 or large_aggs == 0:
+    #     return [len(mine_tiles), click_tiles, aggregations, mine_combinations, 0]
+
+
+    # STEP 6: for all large aggregations, if no patterns were detected, probe the aggregation with subset elimination
+    # subset_elimination_ran = 0
+    # for i in range(len(aggregations)):
+    #     if len(aggregations[i]) >= 22:
+    #         # setting up bordering_unfinished_numbers
+    #         bordering_unfinished_numbers = set()
+    #         for border_tile in aggregations[i]:
+    #             cur_set = return_bordering_unfinished_numbers(gameboard, col_x_coords, row_y_coords, unfinished_numbers, border_tile)
+    #             bordering_unfinished_numbers.update(cur_set)
+    #         # running subset elimination
+    #         print()
+    #         print("   RUNNING SUBSET ELIMINATION...")
+    #         print()
+    #         se_result = sE.subset_elimination(gameboard, col_x_coords, row_y_coords, list(bordering_unfinished_numbers))
+    #         if len(se_result) > 0:
+    #             subset_elimination_ran = 1
+    #             mine_tiles.extend(se_result)
+
 
     # print(time.time() - start)
-    return [len(mine_tiles), click_tiles, aggregations, mine_combinations]
+    return [len(mine_tiles), click_tiles, aggregations, mine_combinations, subset_elimination_ran]
 
 
 
