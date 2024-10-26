@@ -88,7 +88,7 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                 return 0
     else:  # tile detection for minesweeper.one
         # checking if a bomb is detected at the given tile coordinate
-        if ((16, 16, 16, 255) in tile_colors or (14, 14, 14, 255) in tile_colors or (0, 0, 0, 255) in tile_colors) and (255, 255, 255, 255) in tile_colors:
+        if ((16, 16, 16, 255) in tile_colors or (14, 14, 14, 255) in tile_colors or (0, 0, 0, 255) in tile_colors) and (255, 255, 255, 255) in tile_colors or (191, 191, 191, 255) in tile_colors:
             return 9
         # checking for number 8
         for color in tile_colors:
@@ -103,6 +103,8 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                     return 1
                 case (61, 61, 239, 255):
                     return 1
+                case (34, 34, 235, 255):
+                    return 1
                 case (0, 111, 21, 255):
                     return 2
                 case (11, 115, 31):
@@ -111,11 +113,15 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                     return 2
                 case (54, 135, 52, 255):
                     return 2
+                case (75, 128, 63, 255):
+                    return 2
                 case (255, 7, 27, 255):
                     return 3
                 case (236, 51, 66, 255):
                     return 3
                 case (229, 58, 71, 255):
+                    return 3
+                case (224, 82, 60, 255):
                     return 3
                 case (0, 6, 109, 255):
                     return 4
@@ -123,17 +129,25 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                     return 4
                 case (10, 3, 123, 255):
                     return 4
+                case (11, 11, 114, 255):
+                    return 4
                 case (117, 3, 12, 255):
                     return 5
                 case (123, 2, 2, 255):
                     return 5
                 case (127, 10, 20, 255):
                     return 5
+                case (124, 61, 52, 255):
+                    return 5
                 case (0, 112, 111, 255):
                     return 6
                 case (45, 129, 128, 255):
                     return 6
                 case (37, 123, 123, 255):
+                    return 6
+                case (73, 127, 128, 255):
+                    return 6
+                case (37, 109, 111, 255):
                     return 6
                 case (0, 0, 0, 255):
                     return 7

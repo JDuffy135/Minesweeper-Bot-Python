@@ -456,7 +456,8 @@ def local_search(gameboard, col_x_coords, row_y_coords, unfinished_numbers, bomb
 
 
     # print(time.time() - start)
-    return [len(mine_tiles), click_tiles, aggregations, mine_combinations, subset_elimination_ran]
+    return [len(mine_tiles), click_tiles, aggregations, mine_combinations]
+    # return [len(mine_tiles), click_tiles, aggregations, mine_combinations, subset_elimination_ran]
 
 
 

@@ -113,6 +113,7 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
             break
         elif len(remaining_tiles) == 0 and bombs_remaining != 0:
             print("INVALID GAME (note: counts as loss)")
+            end_time = time.time()
             invalid_game = 1
             invalid_result = [
                 1,
@@ -195,8 +196,8 @@ def run_algorithm(gameboard, col_x_coords, row_y_coords, responses) -> list:
                 if len(aggregation) > 21:
                     large_aggregation_occurrences = large_aggregation_occurrences + 1
                     break
-            if LS_RESULT[4] == 1:
-                subset_elimination_instances = subset_elimination_instances + 1
+            # if LS_RESULT[4] == 1:
+            #     subset_elimination_instances = subset_elimination_instances + 1
 
 
         # 3.) PROBABILITY ENGINE
