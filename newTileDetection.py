@@ -13,6 +13,62 @@ def screenshot_board(zoom_size: int, col_x_coords: dict, row_y_coords: dict):
     return screenshot
 
 
+# compares cur_color to cmp_color to see if they have the same pattern (i.e. are roughly the same color)
+# the purpose of this is to make the tile detection work in more general cases, rather than having the colors
+# match hardcorded values exactly
+def compare_colors(cur_color: tuple, cmp_color: tuple) -> bool:
+    # initializing variables
+    red_A, green_A, blue_A = cur_color[0], cur_color[1], cur_color[2]
+    red_B, green_B, blue_B = cmp_color[0], cmp_color[1], cmp_color[2]
+    ratio_threshold = 0.1  # determines the threshold that the difference of 2 of the 3 ratios need to be smaller than
+    outer_ratio_threshold = 0.3  # determines the threshold that the difference of all 3 ratios need to be smaller than
+    difference_threshold = 64  # determines the max difference allowed between each tuple's respective r,g, and b values
+
+    # finding difference between each tuple's r, g, and b values and comparing to difference_threshold
+    if (
+        abs(red_A - red_B) > difference_threshold or
+        abs(green_A - green_B) > difference_threshold or
+        abs(blue_A - blue_B) > difference_threshold
+    ):
+        return False
+
+    # finding and comparing ratios for both color tuples
+    outer_ratios, ratios = 0, 0  # will count how many of the abs difference values are smaller than each ratio threshold
+    rg_ratio_A = min(red_A, green_A) / max(max(red_A, green_A), 1)
+    rg_ratio_B = min(red_B, green_B) / max(max(red_B, green_B), 1)
+    gb_ratio_A = min(green_A, blue_A) / max(max(green_A, blue_A), 1)
+    gb_ratio_B = min(green_B, blue_B) / max(max(green_B, blue_B), 1)
+    rb_ratio_A = min(red_A, blue_A) / max(max(red_A, blue_A), 1)
+    rb_ratio_B = min(red_B, blue_B) / max(max(red_B, blue_B), 1)
+    # abs difference values
+    rg_abs_diff = abs(rg_ratio_A - rg_ratio_B)
+    gb_abs_diff = abs(gb_ratio_A - gb_ratio_B)
+    rb_abs_diff = abs(rb_ratio_A - rb_ratio_B)
+    # counting number of abs difference values under the thresholds
+    if rg_abs_diff < outer_ratio_threshold:
+        outer_ratios += 1
+        if rg_abs_diff < ratio_threshold:
+            ratios += 1
+    if gb_abs_diff < outer_ratio_threshold:
+        outer_ratios += 1
+        if gb_abs_diff < ratio_threshold:
+            ratios += 1
+    if rb_abs_diff < outer_ratio_threshold:
+        outer_ratios += 1
+        if rb_abs_diff < ratio_threshold:
+            ratios += 1
+    # return False if the numbers aren't similar enough
+    if outer_ratios < 3 or ratios < 2:
+        # print(f"ratio threshold not met for cur_color: {cur_color}, cmp_color: {cmp_color}")
+        # print(f"\trg_ratio difference: {abs(rg_ratio_A - rg_ratio_B)}")
+        # print(f"\tgb_ratio difference: {abs(gb_ratio_A - gb_ratio_B)}")
+        # print(f"\trb_ratio difference: {abs(rb_ratio_A - rb_ratio_B)}")
+        return False
+
+    # if False was never returned, that means all of the values line up as they should
+    return True
+
+
 # returns the tile type of the tile at position (col, row) given a screenshot of the entire board
 # -1 is a closed space, 0 is an open space, 1 - 8 are the number tiles, and 9 is a bomb
 # if the function returns -2, then none of the known tiles were detected
@@ -39,8 +95,15 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
         for color in tile_colors:
             if (color[0] > 0 and color[1] > 0 and color[2] > 0) and (color[0] < 26 and color[1] < 26 and color[2] < 26):
                 return 9
-        # now checking for numbers 1 - 8
+        # checking for number 8
         for color in tile_colors:
+            if (color[0] >= 115 and color[1] >= 115 and color[2] >= 115) and (
+                    color[0] <= 130 and color[1] <= 130 and color[2] <= 130) and (
+                    color[0] == color[1] and color[0] == color[2]):
+                return 8
+        # now checking for numbers 1 - 7
+        for color in tile_colors:
+            # checking if color matches hardcoded values exactly
             match color:
                 case (0, 13, 248, 255):
                     return 1
@@ -62,12 +125,39 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                     return 6
                 case (0, 0, 0, 255):
                     return 7
-                case (117, 117, 117, 255):
-                    return 8
-                case (123, 123, 123, 255):
-                    return 8
-                case(146, 146, 146, 255):
-                    return 8
+                # case (117, 117, 117, 255):
+                #     return 8
+                # case (123, 123, 123, 255):
+                #     return 8
+            # checking if color is close to any of the hardcoded values
+            if compare_colors(color, (20, 50, 240, 255)):
+                return 1
+            if compare_colors(color, (20, 120, 40, 255)):
+                return 2
+            if compare_colors(color, (235, 60, 70, 255)):
+                return 3
+            if compare_colors(color, (35, 40, 125, 255)):
+                return 4
+            if compare_colors(color, (125, 40, 50, 255)):
+                return 5
+            if compare_colors(color, (35, 115, 110, 255)):
+                return 6
+            if compare_colors(color, (51, 51, 51, 255)):
+                return 7
+            # if compare_colors(color, (0, 13, 248, 255)):
+            #     return 1
+            # if compare_colors(color, (0, 116, 22, 255)):
+            #     return 2
+            # if compare_colors(color, (245, 6, 24, 255)):
+            #     return 3
+            # if compare_colors(color, (0, 6, 114, 255)):
+            #     return 4
+            # if compare_colors(color, (123, 3, 12, 255)):
+            #     return 5
+            # if compare_colors(color, (0, 117, 116, 255)):
+            #     return 6
+            # if compare_colors(color, (51, 0, 0, 255)):
+            #     return 7
         # if not a number or bomb, we must distinguish between an open or closed space by checking the colors
         # near the top of the given tile (to see if pure white is present)
         if (191, 191, 191, 255) in tile_colors and len(tile_colors) < 3:
@@ -96,6 +186,7 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                 return 8
         # now checking for numbers 1 - 7
         for color in tile_colors:
+            # checking if color matches hardcoded values exactly
             match color:
                 case (34, 45, 235, 255):
                     return 1
@@ -153,6 +244,22 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                     return 7
                 case (51, 51, 51, 255):
                     return 7
+            # checking if color is close to any of the hardcoded values
+            if compare_colors(color, (34, 45, 235, 255)):
+                return 1
+            if compare_colors(color, (39, 110, 23, 255)):
+                return 2
+            if compare_colors(color, (229, 58, 71, 255)):
+                return 3
+            if compare_colors(color, (34, 39, 123, 255)):
+                return 4
+            if compare_colors(color, (124, 61, 52, 255)):
+                return 5
+            if compare_colors(color, (37, 109, 111, 255)):
+                return 6
+            if compare_colors(color, (51, 51, 51, 255)):
+                return 7
+
         # if not a number or bomb, we must distinguish between an open or closed space by checking the colors
         # near the top of the given tile (to see if pure white is present)
         if ((181, 181, 181, 255) in tile_colors or (189, 189, 189, 255) in tile_colors) and len(tile_colors) < 2:
