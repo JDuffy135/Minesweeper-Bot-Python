@@ -20,9 +20,9 @@ def compare_colors(cur_color: tuple, cmp_color: tuple) -> bool:
     # initializing variables
     red_A, green_A, blue_A = cur_color[0], cur_color[1], cur_color[2]
     red_B, green_B, blue_B = cmp_color[0], cmp_color[1], cmp_color[2]
-    ratio_threshold = 0.1  # determines the threshold that the difference of 2 of the 3 ratios need to be smaller than
+    ratio_threshold = 0.2  # determines the threshold that the difference of 2 of the 3 ratios need to be smaller than
     outer_ratio_threshold = 0.3  # determines the threshold that the difference of all 3 ratios need to be smaller than
-    difference_threshold = 64  # determines the max difference allowed between each tuple's respective r,g, and b values
+    difference_threshold = 48  # determines the max difference allowed between each tuple's respective r,g, and b values
 
     # finding difference between each tuple's r, g, and b values and comparing to difference_threshold
     if (
@@ -94,6 +94,7 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
         # checking if a bomb is detected at the given tile coordinate
         for color in tile_colors:
             if (color[0] > 0 and color[1] > 0 and color[2] > 0) and (color[0] < 26 and color[1] < 26 and color[2] < 26):
+                # print(f"bomb found, color is {color}")
                 return 9
         # checking for number 8
         for color in tile_colors:
@@ -113,6 +114,8 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                     return 2
                 case (0, 107, 20, 255):
                     return 2
+                case (48, 128, 63, 255):
+                    return 2
                 case (255, 7, 27, 255):
                     return 3
                 case (245, 6, 24, 255):
@@ -125,39 +128,27 @@ def return_tile_type(zoom_size: int, col_x_coords: dict, row_y_coords: dict, scr
                     return 6
                 case (0, 0, 0, 255):
                     return 7
-                # case (117, 117, 117, 255):
-                #     return 8
-                # case (123, 123, 123, 255):
-                #     return 8
+                case (117, 117, 117, 255):
+                    return 8
+                case (123, 123, 123, 255):
+                    return 8
             # checking if color is close to any of the hardcoded values
-            if compare_colors(color, (20, 50, 240, 255)):
+            if compare_colors(color, (40, 60, 230, 255)):
                 return 1
-            if compare_colors(color, (20, 120, 40, 255)):
+            if compare_colors(color, (50, 130, 60, 255)):
                 return 2
             if compare_colors(color, (235, 60, 70, 255)):
                 return 3
-            if compare_colors(color, (35, 40, 125, 255)):
+            if compare_colors(color, (90, 95, 150, 255)):
                 return 4
-            if compare_colors(color, (125, 40, 50, 255)):
+            if compare_colors(color, (125, 5, 10, 255)):
                 return 5
-            if compare_colors(color, (35, 115, 110, 255)):
+            if compare_colors(color, (140, 50, 55, 255)):
+                return 5
+            if compare_colors(color, (90, 150, 150, 255)):
                 return 6
             if compare_colors(color, (51, 51, 51, 255)):
                 return 7
-            # if compare_colors(color, (0, 13, 248, 255)):
-            #     return 1
-            # if compare_colors(color, (0, 116, 22, 255)):
-            #     return 2
-            # if compare_colors(color, (245, 6, 24, 255)):
-            #     return 3
-            # if compare_colors(color, (0, 6, 114, 255)):
-            #     return 4
-            # if compare_colors(color, (123, 3, 12, 255)):
-            #     return 5
-            # if compare_colors(color, (0, 117, 116, 255)):
-            #     return 6
-            # if compare_colors(color, (51, 0, 0, 255)):
-            #     return 7
         # if not a number or bomb, we must distinguish between an open or closed space by checking the colors
         # near the top of the given tile (to see if pure white is present)
         if (191, 191, 191, 255) in tile_colors and len(tile_colors) < 3:
